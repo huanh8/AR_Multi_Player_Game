@@ -4,21 +4,33 @@ using UnityEngine;
 
 public class BoardGenerator : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField]
+    int _size = 6;
+    [SerializeField]
+    Vector3 _rotation = new Vector3(90, 0, 45);
+
+    public void ManualStart()
+    {
+        CreateBoard();
+    }
+
+    private void CreateBoard()
     {
         bool isWhite = false;
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < _size; i++)
         {
             GameObject row = new GameObject();
             row.transform.SetParent(transform);
             row.transform.localPosition = new Vector3(i, 0, 0);
-            isWhite =!isWhite;
-            for (int j = 0; j < 6; j++)
+
+            row.name = $"Row{i}";
+            isWhite = !isWhite;
+            for (int j = 0; j < _size; j++)
             {
                 GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
                 quad.transform.SetParent(row.transform);
                 quad.transform.localPosition = new Vector3(0, j, 0);
+                quad.name = $"R{i}{j}";
                 // if isWhite is true, set quad color to white
                 if (isWhite)
                 {
@@ -31,16 +43,8 @@ public class BoardGenerator : MonoBehaviour
                     quad.GetComponent<Renderer>().material.color = Color.black;
                     isWhite = true;
                 }
-
             }
         }
-        transform.localRotation = Quaternion.Euler(90, 0, 45);
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        transform.localRotation = Quaternion.Euler(_rotation);
     }
 }

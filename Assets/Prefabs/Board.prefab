@@ -44,3 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c6e5991519dc674a99764d8bfa6ad39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _size: 6
+  _rotation: {x: 90, y: 0, z: 45}

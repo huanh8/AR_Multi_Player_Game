@@ -66,7 +66,7 @@ public class PlayerNetwork : NetworkBehaviour
     //     Debug.Log($"{OwnerClientId} Random number changed {_randomNumber.Value}");
     // }
 
-        private void OnRandomNumberChanged(MyCustomData previousValue, MyCustomData newValue)
+    private void OnRandomNumberChanged(MyCustomData previousValue, MyCustomData newValue)
     {
         Debug.Log($"{OwnerClientId} changed {newValue._myInt} and {newValue._myBool}");
     }
