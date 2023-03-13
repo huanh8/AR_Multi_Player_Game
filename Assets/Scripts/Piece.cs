@@ -5,6 +5,5 @@ using Zenject;
 
 public class Piece : MonoBehaviour
 {
-
  public class Factory : PlaceholderFactory<Piece> { }
 }
