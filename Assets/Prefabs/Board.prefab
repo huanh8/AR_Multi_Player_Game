@@ -10,7 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 462470342480813523}
   - component: {fileID: 462470342480813522}
-  m_Layer: 0
+  - component: {fileID: 8010027489681730814}
+  m_Layer: 6
   m_Name: Board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,9 +45,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c6e5991519dc674a99764d8bfa6ad39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _size: 6
-  _rotation: {x: 90, y: 0, z: 45}
+  _rotation: {x: 90, y: 0, z: 0}
   _redPiecePrefab: {fileID: 4830827264238800169, guid: 10b0b3fe4dc350c499a0710043b6b021,
     type: 3}
   _bluePiecePrefab: {fileID: 3257742821716003525, guid: 8240b1635913a2e4bbc0b1d44096990c,
     type: 3}
+  _camera: {fileID: 0}
+  _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
+    type: 3}
+--- !u!65 &8010027489681730814
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462470342480813533}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 6, y: 6, z: 1}
+  m_Center: {x: 2.5, y: 2.5, z: 0}
