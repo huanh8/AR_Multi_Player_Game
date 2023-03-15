@@ -58,4 +58,16 @@ public class PlaceChessBoard : MonoBehaviour
             planeManager.enabled = true;
         }
     }
+
+    public void ConfirmChessBoard()
+    {
+        if (isPlaced)
+        {
+            GameObject[] detectedPlanes = GameObject.FindGameObjectsWithTag("PlaneDetect");
+            foreach (GameObject plane in detectedPlanes)
+            {
+                Destroy(plane);
+            }
+        }
+    }
 }
