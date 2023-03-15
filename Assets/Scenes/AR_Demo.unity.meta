@@ -1,5 +1,10 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scenes/AR_Demo.unity.meta
 guid: 262cd30006ce7434d84ac62b9d0dad8d
+========
+guid: 53dde95a022e69c4990ebe69361f9dfb
+folderAsset: yes
+>>>>>>>> main:Assets/Arts.meta
 DefaultImporter:
   externalObjects: {}
   userData: 
