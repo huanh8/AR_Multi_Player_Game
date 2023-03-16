@@ -53,6 +53,9 @@ MonoBehaviour:
   _camera: {fileID: 0}
   _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
     type: 3}
+  _offSite: -0.6
+  _redMaterial: {fileID: 2100000, guid: 2e09ded5b88bf584eba8b5eb285615ad, type: 2}
+  _blueMaterial: {fileID: 2100000, guid: 8b386afd9a3e19a4786d6cdd8bfab45a, type: 2}
 --- !u!65 &8010027489681730814
 BoxCollider:
   m_ObjectHideFlags: 0

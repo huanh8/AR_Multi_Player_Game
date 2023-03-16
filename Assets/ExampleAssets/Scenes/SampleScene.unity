@@ -574,9 +574,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boardGeneratorPrefab: {fileID: 462470342480813533, guid: 6e8e05b42be7c714ca784c0a578e25c4,
     type: 3}
-  _redPiecePrefab: {fileID: 4830827264238800169, guid: 10b0b3fe4dc350c499a0710043b6b021,
+  _redPiecePrefab: {fileID: -8791455781929541162, guid: 10b0b3fe4dc350c499a0710043b6b021,
     type: 3}
-  _bluePiecePrefab: {fileID: 3257742821716003525, guid: 8240b1635913a2e4bbc0b1d44096990c,
+  _bluePiecePrefab: {fileID: -6716312106508224483, guid: 8240b1635913a2e4bbc0b1d44096990c,
     type: 3}
 --- !u!4 &672691652
 Transform:
