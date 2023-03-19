@@ -45,17 +45,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c6e5991519dc674a99764d8bfa6ad39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotation: {x: 90, y: 0, z: 0}
-  _redPiecePrefab: {fileID: 4830827264238800169, guid: 10b0b3fe4dc350c499a0710043b6b021,
-    type: 3}
-  _bluePiecePrefab: {fileID: 3257742821716003525, guid: 8240b1635913a2e4bbc0b1d44096990c,
-    type: 3}
-  _camera: {fileID: 0}
-  _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
-    type: 3}
-  _offSite: -0.6
+  _pieceRotation: {x: 90, y: 0, z: 0}
   _redMaterial: {fileID: 2100000, guid: 2e09ded5b88bf584eba8b5eb285615ad, type: 2}
   _blueMaterial: {fileID: 2100000, guid: 8b386afd9a3e19a4786d6cdd8bfab45a, type: 2}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
+    type: 3}
+  _offSite: 0.6
+  _boxColliderSize: 6
+  _boxColliderCenter: 2.5
+  _camera: {fileID: 0}
 --- !u!65 &8010027489681730814
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -67,5 +68,5 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 6, y: 6, z: 1}
-  m_Center: {x: 2.5, y: 2.5, z: 0}
+  m_Size: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
