@@ -58,10 +58,15 @@ public class BoardGenerator : MonoBehaviour
         UpdateMouseOver();
 
         //if it is my turn
-        if(true)
+        if (true)
         {
             int x = (int)_mouseOver.x;
             int z = (int)_mouseOver.z;
+
+            if (_selectedPiece != null)
+            {
+                UpdatePieceDrag(_selectedPiece);
+            }
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -81,19 +86,52 @@ public class BoardGenerator : MonoBehaviour
         _selectedPiece = _pieces[x1, z1];
         Debug.Log($"try move _selectedPiece.name {_selectedPiece.name} {x2}, {z2}");
 
-        MovePiece(_selectedPiece,x2,z2);
+        if (CheckBoundary(x2, z2))
+        {
+            if (_selectedPiece != null)
+            {
+                MovePiece(_selectedPiece, x1, z1);
+            }
+            ResetSelectedPiece();
+            return;
+        }
+        if (_selectedPiece != null)
+        {
+            //if the piece is not moving
+            if (_endDrag == _startDrag)
+            {
+                MovePiece(_selectedPiece, x1, z1);
+                ResetSelectedPiece();
+                return;
+            }
+
+            //if the piece is moving to an empty space
+            if (_pieces[x2, z2] == null)
+            {
+                MovePiece(_selectedPiece, x2, z2);
+                ResetSelectedPiece();
+                return;
+            }
+        }
     }
+
+    private void ResetSelectedPiece()
+    {
+        _startDrag = Vector3.zero;
+        _selectedPiece = null;
+    }
+
     private void MovePiece(Piece p, int x, int z)
     {
-        p.transform.position = (Vector3.right*x) + (Vector3.forward*z) + (Vector3.up*_offSite)+_boardOffset;
-        
+        p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
+
         Debug.Log($"MovePiece{p.transform.position}");
     }
 
     private void SelectPiece(int x, int z)
     {
         //out of bounds
-        if (x < 0 || x >= _pieces.Length || z < 0 || z >= _pieces.Length)
+        if (CheckBoundary(x, z))
             return;
         Piece p = _pieces[x, z];
         if (p != null)
@@ -103,6 +141,22 @@ public class BoardGenerator : MonoBehaviour
             Debug.Log($"_selectedPiece.name {_selectedPiece.name} {x}, {z}");
         }
     }
+    private void UpdatePieceDrag(Piece p)
+    {
+        if (_camera == null)
+        {
+            Debug.Log("No camera found");
+            return;
+        }
+
+        RaycastHit hit;
+        if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out hit, 25.0f, _layerMask))
+        {
+            p.transform.position = hit.point + Vector3.up - _boardOffset;
+        }
+
+    }
+
     private void UpdateMouseOver()
     {
         if (_camera == null)
@@ -115,20 +169,20 @@ public class BoardGenerator : MonoBehaviour
         if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out hit, 25.0f, _layerMask))
         {
             //cast it as int to get the whole number
-            _mouseOver = new Vector3((int)hit.point.x, (int)hit.point.y +_offSite, (int)hit.point.z);
+            _mouseOver = new Vector3((int)hit.point.x, (int)hit.point.y + _offSite, (int)hit.point.z);
         }
         else
         {
             _mouseOver = new Vector3(-1, -1, -1);
         }
         Debug.Log($"_mouseOver {_mouseOver}");
-        //draw the raycast
+
     }
     // draw the raycast
     private void OnDrawGizmos()
     {
         Gizmos.color = new Color(1, 0, 0, 0.5f);
-        Vector3 gizmosPosition = new Vector3(_mouseOver.x + _boardOffset.x, _mouseOver.y, _mouseOver.z+ _boardOffset.z);
+        Vector3 gizmosPosition = new Vector3(_mouseOver.x + _boardOffset.x, _mouseOver.y, _mouseOver.z + _boardOffset.z);
         Gizmos.DrawCube(gizmosPosition, Vector3.one);
     }
     private void CreateBoard()
@@ -173,9 +227,12 @@ public class BoardGenerator : MonoBehaviour
         //align the board to the world coordinates
         transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
     }
-
     private void GeneratePieces(int i, int j, GameObject quad, Material material)
     {
         _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.Euler(_pieceRotation), quad.transform, material);
+    }
+    private bool CheckBoundary(int x, int z)
+    {
+        return x < 0 || x >= _pieces.Length || z < 0 || z >= _pieces.Length;
     }
 }
