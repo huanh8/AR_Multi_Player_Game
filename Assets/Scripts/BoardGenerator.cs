@@ -13,6 +13,7 @@ public class BoardGenerator : MonoBehaviour
     [SerializeField] LayerMask _layerMask;
     [SerializeField] GameObject _boardCube;        // board cube object
     [SerializeField] float _offSite = 0.6f;        // offset for pieces
+    [SerializeField] Vector3 _boardOffset = new Vector3(0.5f, 0, 0.5f); // offset for the board
 
     // size of the box collider
     [SerializeField] private float _boxColliderSize = 6f;
@@ -57,6 +58,7 @@ public class BoardGenerator : MonoBehaviour
         UpdateMouseOver();
 
         //if it is my turn
+        if(true)
         {
             int x = (int)_mouseOver.x;
             int z = (int)_mouseOver.z;
@@ -71,12 +73,21 @@ public class BoardGenerator : MonoBehaviour
             }
         }
     }
+
     private void TryMove(int x1, int z1, int x2, int z2)
     {
         _startDrag = new Vector3(x1, 0, z1);
         _endDrag = new Vector3(x2, 0, z2);
         _selectedPiece = _pieces[x1, z1];
         Debug.Log($"try move _selectedPiece.name {_selectedPiece.name} {x2}, {z2}");
+
+        MovePiece(_selectedPiece,x2,z2);
+    }
+    private void MovePiece(Piece p, int x, int z)
+    {
+        p.transform.position = (Vector3.right*x) + (Vector3.forward*z) + (Vector3.up*_offSite)+_boardOffset;
+        
+        Debug.Log($"MovePiece{p.transform.position}");
     }
 
     private void SelectPiece(int x, int z)
@@ -104,14 +115,22 @@ public class BoardGenerator : MonoBehaviour
         if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out hit, 25.0f, _layerMask))
         {
             //cast it as int to get the whole number
-            _mouseOver = new Vector3((int)hit.point.x, (int)hit.point.y, (int)hit.point.z);
+            _mouseOver = new Vector3((int)hit.point.x, (int)hit.point.y +_offSite, (int)hit.point.z);
         }
         else
         {
             _mouseOver = new Vector3(-1, -1, -1);
         }
+        Debug.Log($"_mouseOver {_mouseOver}");
+        //draw the raycast
     }
-
+    // draw the raycast
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(1, 0, 0, 0.5f);
+        Vector3 gizmosPosition = new Vector3(_mouseOver.x + _boardOffset.x, _mouseOver.y, _mouseOver.z+ _boardOffset.z);
+        Gizmos.DrawCube(gizmosPosition, Vector3.one);
+    }
     private void CreateBoard()
     {
         int redRowLimit = 3;
@@ -128,6 +147,7 @@ public class BoardGenerator : MonoBehaviour
             for (int j = 0; j < Constants.BOARD_SIZE; j++)
             {
                 GameObject quad = Instantiate(_boardCube, new Vector3(i, 0, j), Quaternion.identity);
+
                 quad.transform.SetParent(row.transform);
                 //quad.transform.localPosition = new Vector3(0, j, 0);
                 quad.name = $"R{i}{j}";
@@ -139,7 +159,6 @@ public class BoardGenerator : MonoBehaviour
                 if (j < redRowLimit)
                 {
                     GeneratePieces(i, j, quad, _redMaterial);
-
                 }
                 // create blue pieces when {3,5},{4,4},{4,5},{5,3},{5,4},{5,5}
                 else if (j >= Constants.BOARD_SIZE - blueRowLimit)
@@ -147,11 +166,12 @@ public class BoardGenerator : MonoBehaviour
                     // GeneratePieces(i, j, quad, _bluePieceFactory);
                     GeneratePieces(i, j, quad, _blueMaterial);
                 }
-
             }
             redRowLimit--;
             blueRowLimit++;
         }
+        //align the board to the world coordinates
+        transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
     }
 
     private void GeneratePieces(int i, int j, GameObject quad, Material material)

@@ -54,6 +54,7 @@ MonoBehaviour:
   _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
     type: 3}
   _offSite: 0.6
+  _boardOffset: {x: 0.5, y: 0, z: 0.5}
   _boxColliderSize: 6
   _boxColliderCenter: 2.5
   _camera: {fileID: 0}
