@@ -9,6 +9,6 @@ public class GameInstaller : MonoInstaller
     public override void InstallBindings()
     {
         Container.Bind<BoardGenerator>().FromComponentInNewPrefab(_boardGeneratorPrefab).AsSingle();
-        Container.BindFactory<Vector3, Quaternion, Transform, Material, Piece, Piece.Factory>().FromComponentInNewPrefab(_piecePrefab).AsSingle();
+        Container.BindFactory<Vector3, Quaternion, Material, Piece, Piece.Factory>().FromComponentInNewPrefab(_piecePrefab).AsSingle();
     }
 }

@@ -27,6 +27,8 @@ public class BoardGenerator : MonoBehaviour
     private Vector3 _startDrag;                 // start drag position
     private Vector3 _endDrag;                   // end drag position
     private Piece.Factory _pieceFactory;
+    private bool _isRedTurn = true;             // is it red turn
+    private bool _isRed;
 
     [Inject]
     private void Init(
@@ -86,6 +88,7 @@ public class BoardGenerator : MonoBehaviour
         _selectedPiece = _pieces[x1, z1];
         Debug.Log($"try move _selectedPiece.name {_selectedPiece.name} {x2}, {z2}");
 
+        // if it out of the board will reset the selected piece
         if (CheckBoundary(x2, z2))
         {
             if (_selectedPiece != null)
@@ -95,6 +98,7 @@ public class BoardGenerator : MonoBehaviour
             ResetSelectedPiece();
             return;
         }
+
         if (_selectedPiece != null)
         {
             //if the piece is not moving
@@ -104,15 +108,43 @@ public class BoardGenerator : MonoBehaviour
                 ResetSelectedPiece();
                 return;
             }
-
-            //if the piece is moving to an empty space
-            if (_pieces[x2, z2] == null)
+            // check if its a valid move
+            if (_selectedPiece.ValidMove(_pieces, x1, z1, x2, z2))
             {
+                // Did we kill anything?
+                // if this is a jump
+                Debug.Log($"Mathf.Abs(x2 - x1) {Mathf.Abs(x2 - x1)}");
+                if (Mathf.Abs(x2 - x1) == 2)
+                {
+                    Piece p = _pieces[(x1 + x2) / 2, (z1 + z2) / 2];
+                    if (p != null)
+                    {
+                        _pieces[(x1 + x2) / 2, (z1 + z2) / 2] = null;
+                        Destroy(p.gameObject);
+                    }
+                }
+                //move the piece
+                _pieces[x2, z2] = _selectedPiece;
+                _pieces[x1, z1] = null;
                 MovePiece(_selectedPiece, x2, z2);
+                EndTurn();
+            }
+            else
+            {
+                //if the move is not valid
+                Debug.Log($"Move is not valid {x2}, {z2}, wiil move back to {x1}, {z1}");
+                MovePiece(_selectedPiece, x1, z1);
                 ResetSelectedPiece();
                 return;
             }
         }
+    }
+    private void EndTurn()
+    {
+        Debug.Log("EndTurn");
+        ResetSelectedPiece();
+        _isRedTurn = !_isRedTurn;
+        CheckVictory();
     }
 
     private void ResetSelectedPiece()
@@ -120,12 +152,16 @@ public class BoardGenerator : MonoBehaviour
         _startDrag = Vector3.zero;
         _selectedPiece = null;
     }
+    private void CheckVictory()
+    {
+
+    }
 
     private void MovePiece(Piece p, int x, int z)
     {
         p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
 
-        Debug.Log($"MovePiece{p.transform.position}");
+        Debug.Log($"MovePiece to {p.transform.position}");
     }
 
     private void SelectPiece(int x, int z)
@@ -175,7 +211,7 @@ public class BoardGenerator : MonoBehaviour
         {
             _mouseOver = new Vector3(-1, -1, -1);
         }
-        Debug.Log($"_mouseOver {_mouseOver}");
+        //Debug.Log($"_mouseOver {_mouseOver}");
 
     }
     // draw the raycast
@@ -212,13 +248,13 @@ public class BoardGenerator : MonoBehaviour
                 // create red pieces when {0,1}, {0,1}, {0,2},{1,0},{1,1},{2,0}
                 if (j < redRowLimit)
                 {
-                    GeneratePieces(i, j, quad, _redMaterial);
+                    GeneratePieces(i, j, _redMaterial);
                 }
                 // create blue pieces when {3,5},{4,4},{4,5},{5,3},{5,4},{5,5}
                 else if (j >= Constants.BOARD_SIZE - blueRowLimit)
                 {
                     // GeneratePieces(i, j, quad, _bluePieceFactory);
-                    GeneratePieces(i, j, quad, _blueMaterial);
+                    GeneratePieces(i, j, _blueMaterial);
                 }
             }
             redRowLimit--;
@@ -227,9 +263,11 @@ public class BoardGenerator : MonoBehaviour
         //align the board to the world coordinates
         transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
     }
-    private void GeneratePieces(int i, int j, GameObject quad, Material material)
+    private void GeneratePieces(int i, int j, Material material)
     {
-        _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.Euler(_pieceRotation), quad.transform, material);
+        _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j) + _boardOffset, Quaternion.Euler(_pieceRotation), material);
+        //change the name of the piece to the material name
+        _pieces[i, j].name = $"{material.name}_{i}{j}";
     }
     private bool CheckBoundary(int x, int z)
     {
