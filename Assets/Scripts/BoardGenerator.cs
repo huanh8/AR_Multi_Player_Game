@@ -87,7 +87,7 @@ public class BoardGenerator : MonoBehaviour
         _startDrag = new Vector3(x1, 0, z1);
         _endDrag = new Vector3(x2, 0, z2);
         _selectedPiece = _pieces[x1, z1];
-        Debug.Log($"try move _selectedPiece.name {_selectedPiece.name} {x2}, {z2}");
+        // Debug.Log($"try move _selectedPiece.name {_selectedPiece.name} {x2}, {z2}");
 
         // if it out of the board will reset the selected piece
         if (CheckBoundary(x2, z2))
@@ -143,7 +143,7 @@ public class BoardGenerator : MonoBehaviour
             else
             {
                 //if the move is not valid
-                Debug.Log($"Move is not valid {x2}, {z2}, wiil move back to {x1}, {z1}");
+                Debug.Log($"Move is not valid {x2}, {z2}, will move back to {x1}, {z1}");
                 MovePiece(_selectedPiece, x1, z1);
                 ResetSelectedPiece();
                 return;
@@ -179,7 +179,6 @@ public class BoardGenerator : MonoBehaviour
         {
             _selectedPiece = p;
             _startDrag = _mouseOver;
-            Debug.Log($"_selectedPiece.name {_selectedPiece.name} {x}, {z}");
         }
     }
     private void UpdatePieceDrag(Piece p)
@@ -195,7 +194,6 @@ public class BoardGenerator : MonoBehaviour
         {
             p.transform.position = hit.point + Vector3.up - _boardOffset;
         }
-
     }
 
     private void UpdateMouseOver()
@@ -216,7 +214,6 @@ public class BoardGenerator : MonoBehaviour
         {
             _mouseOver = new Vector3(-1, -1, -1);
         }
-
     }
 
     private void CreateBoard()
@@ -278,19 +275,12 @@ public class BoardGenerator : MonoBehaviour
         _pieces[i, j].name = $"{material.name}_{i}{j}";
     }
 
-    // set the first is _redHome and the last is_blueHome
-    private void SetHome()
-    {
-        _pieces[0, 0].name = Constants.RED_HOME;
-        _pieces[Constants.BOARD_SIZE - 1, Constants.BOARD_SIZE - 1].name = Constants.BLUE_HOME;
-    }
-
     private void MovePiece(Piece p, int x, int z)
     {
         p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
         SetName(x, z, p.GetComponent<Renderer>().material);
     }
-    
+
     // draw the raycast
     private void OnDrawGizmos()
     {
