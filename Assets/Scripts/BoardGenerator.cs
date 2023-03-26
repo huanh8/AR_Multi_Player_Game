@@ -28,7 +28,8 @@ public class BoardGenerator : MonoBehaviour
     private Vector3 _endDrag;                   // end drag position
     private Piece.Factory _pieceFactory;
     private bool _isRedTurn = true;             // is it red turn
-    private bool _isRed;
+    private List<Piece> _pieceList;
+
 
     [Inject]
     private void Init(
@@ -94,9 +95,9 @@ public class BoardGenerator : MonoBehaviour
             if (_selectedPiece != null)
             {
                 MovePiece(_selectedPiece, x1, z1);
+                ResetSelectedPiece();
+                return;
             }
-            ResetSelectedPiece();
-            return;
         }
 
         if (_selectedPiece != null)
@@ -108,21 +109,31 @@ public class BoardGenerator : MonoBehaviour
                 ResetSelectedPiece();
                 return;
             }
+
+            // check if it is the top of another piece
+            if (_pieces[x2, z2] != null)
+            {
+                MovePiece(_selectedPiece, x1, z1);
+                ResetSelectedPiece();
+                return;
+            }
+
             // check if its a valid move
             if (_selectedPiece.ValidMove(_pieces, x1, z1, x2, z2))
             {
                 // Did we kill anything?
                 // if this is a jump
-                Debug.Log($"Mathf.Abs(x2 - x1) {Mathf.Abs(x2 - x1)}");
-                if (Mathf.Abs(x2 - x1) == 2)
-                {
-                    Piece p = _pieces[(x1 + x2) / 2, (z1 + z2) / 2];
-                    if (p != null)
-                    {
-                        _pieces[(x1 + x2) / 2, (z1 + z2) / 2] = null;
-                        Destroy(p.gameObject);
-                    }
-                }
+                //Debug.Log($"Mathf.Abs(x2 - x1) {Mathf.Abs(x2 - x1)}");
+                //if (Mathf.Abs(x2 - x1) == 2)
+                //{
+                //    Piece p = _pieces[(x1 + x2) / 2, (z1 + z2) / 2];
+                //    if (p != null)
+                //    {
+                //        _pieces[(x1 + x2) / 2, (z1 + z2) / 2] = null;
+                //        Destroy(p.gameObject);
+                //    }
+                //}
+
                 //move the piece
                 _pieces[x2, z2] = _selectedPiece;
                 _pieces[x1, z1] = null;
@@ -139,6 +150,7 @@ public class BoardGenerator : MonoBehaviour
             }
         }
     }
+
     private void EndTurn()
     {
         Debug.Log("EndTurn");
@@ -155,13 +167,6 @@ public class BoardGenerator : MonoBehaviour
     private void CheckVictory()
     {
 
-    }
-
-    private void MovePiece(Piece p, int x, int z)
-    {
-        p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
-
-        Debug.Log($"MovePiece to {p.transform.position}");
     }
 
     private void SelectPiece(int x, int z)
@@ -211,16 +216,9 @@ public class BoardGenerator : MonoBehaviour
         {
             _mouseOver = new Vector3(-1, -1, -1);
         }
-        //Debug.Log($"_mouseOver {_mouseOver}");
 
     }
-    // draw the raycast
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = new Color(1, 0, 0, 0.5f);
-        Vector3 gizmosPosition = new Vector3(_mouseOver.x + _boardOffset.x, _mouseOver.y, _mouseOver.z + _boardOffset.z);
-        Gizmos.DrawCube(gizmosPosition, Vector3.one);
-    }
+
     private void CreateBoard()
     {
         int redRowLimit = 3;
@@ -265,12 +263,39 @@ public class BoardGenerator : MonoBehaviour
     }
     private void GeneratePieces(int i, int j, Material material)
     {
-        _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j) + _boardOffset, Quaternion.Euler(_pieceRotation), material);
-        //change the name of the piece to the material name
-        _pieces[i, j].name = $"{material.name}_{i}{j}";
+        _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.Euler(_pieceRotation), material);
+        SetName(i, j, material);
+        _pieces[i, j].transform.SetParent(transform);
     }
+
     private bool CheckBoundary(int x, int z)
     {
         return x < 0 || x >= _pieces.Length || z < 0 || z >= _pieces.Length;
+    }
+
+    private void SetName(int i, int j, Material material)
+    {
+        _pieces[i, j].name = $"{material.name}_{i}{j}";
+    }
+
+    // set the first is _redHome and the last is_blueHome
+    private void SetHome()
+    {
+        _pieces[0, 0].name = Constants.RED_HOME;
+        _pieces[Constants.BOARD_SIZE - 1, Constants.BOARD_SIZE - 1].name = Constants.BLUE_HOME;
+    }
+
+    private void MovePiece(Piece p, int x, int z)
+    {
+        p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
+        SetName(x, z, p.GetComponent<Renderer>().material);
+    }
+    
+    // draw the raycast
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(1, 0, 0, 0.5f);
+        Vector3 gizmosPosition = new Vector3(_mouseOver.x + _boardOffset.x, _mouseOver.y, _mouseOver.z + _boardOffset.z);
+        Gizmos.DrawCube(gizmosPosition, Vector3.one);
     }
 }
