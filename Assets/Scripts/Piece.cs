@@ -1,12 +1,13 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
 public class Piece : MonoBehaviour
 {
-    public bool _isRed =true;
-    public bool _isKing;
+    public bool IsRed { get; set; }
+    // define a connectedPieces property
+    public List<Piece> Neighbors { get; set; }
 
     [Inject]
     private void init(Vector3 vec3, Quaternion quat, Material mat)
@@ -16,74 +17,81 @@ public class Piece : MonoBehaviour
         // change the material
         GetComponent<Renderer>().material = mat;
         transform.localRotation = quat;
-        _isRed = true;
-        _isKing = false;
+        IsRed = mat.name == "RedPiece" ? true : false;
+        Neighbors = new List<Piece>();
     }
 
 
     public bool ValidMove(Piece[,] board, int x1, int z1, int x2, int z2)
-    {   
-        Debug.Log($"!!!!!!_isRed  {_isRed}");
-        //if we are moving on the top of another piece
-        if (board[x2, z2] != null)
+    {
+        UpdateNeighborPieces(board, x1, z1);
+        Debug.Log($"Connected Pieces: {Neighbors.Count}");
+        // if it is the red home or blue
+        if (CheckBackHome(x2, z2))
         {
-            Debug.Log("we are moving on the top of another piece");
+            return false;
+        }
+        // if there no neighbors on x2 z2, return false
+        if (CheckTargetNeighbors(board, x1, z1, x2, z2))
+        {
             return false;
         }
 
-        int deltaMoveX = Mathf.Abs(x1 - x2);
-        int deltaMoveZ = z2 - z1;
-        Debug.Log($"deltaMoveX {deltaMoveX} deltaMoveZ {deltaMoveZ} isRed {_isRed} isKing {_isKing}");
-        if(_isRed || _isKing)
+        // if it is orphaned
+        if (Neighbors.Count == 0)
         {
-            //normal move
-            if(deltaMoveX >= 0 )
-            {
-                if(deltaMoveZ >= 0)
-                {
-                    Debug.Log($"normal move{deltaMoveX} {deltaMoveZ}");
-                    return true;
-                }
-            }
-            else if(deltaMoveX == 2)
-            {
-                if(deltaMoveZ == 2)
-                {
-                    Piece p = board[(x1 + x2) / 2, (z1 + z2) / 2];
-                    if(p != null && p._isRed != _isRed)
-                    {
-                        return true;
-                    }
-                }
-            }
+            return false;
         }
-
-
-        if(!_isRed || _isKing)
-        {
-            //normal move
-            if(deltaMoveX <= 1 )
-            {
-                if(deltaMoveZ <= 0)
-                {
-                    return true;
-                }
-            }
-            else if(deltaMoveX == 2)
-            {
-                if(deltaMoveZ == -2)
-                {
-                    Piece p = board[(x1 + x2) / 2, (z1 + z2) / 2];
-                    if(p != null && p._isRed != _isRed)
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        Debug.Log($"invalid move{deltaMoveX} {deltaMoveZ}");
-        return false;
+        return true;
     }
 
- public class Factory : PlaceholderFactory<Vector3,Quaternion, Material,Piece> { }
+    private bool CheckTargetNeighbors(Piece[,] board, int x1, int z1, int x2, int z2)
+    {
+        List<Piece> neighbors = new List<Piece>();
+        // check if there is neighbor near by x2 z2
+        FindNeighbor(board, x2, z2, neighbors);
+        // remove if the neighbor include itself
+        if (neighbors.Contains(board[x1, z1]))
+        {
+            neighbors.Remove(board[x1, z1]);
+        }
+        // return if there no neighbors
+        return neighbors.Count < 1;
+    }
+
+    private List<Piece> UpdateNeighborPieces(Piece[,] board, int x1, int z1)
+    {
+        Neighbors.Clear();
+        FindNeighbor(board, x1, z1);
+        return Neighbors;
+    }
+
+    private void FindNeighbor(Piece[,] board, int x, int z, List<Piece> neighbors = null)
+    {
+        if (neighbors == null)
+        {
+            neighbors = Neighbors;
+        }
+        for (int i = 0; i < Constants.BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++)
+            {
+                if (board[i, j] != null && board[i, j].IsRed == IsRed)
+                {
+                    // check if it is a neighbor except itself
+                    if (Mathf.Abs(i - x) <= 1 && Mathf.Abs(j - z) <= 1 && (i != x || j != z))
+                    {
+                        neighbors.Add(board[i, j]);
+                    }
+                }
+            }
+        }
+    }
+
+    private bool CheckBackHome(int x2, int z2)
+    {
+        return (IsRed && x2 == 0 && z2 == 0) || (!IsRed && x2 == Constants.BOARD_SIZE - 1 && z2 == Constants.BOARD_SIZE - 1);
+    }
+
+    public class Factory : PlaceholderFactory<Vector3, Quaternion, Material, Piece> { }
 }
