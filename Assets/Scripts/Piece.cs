@@ -8,6 +8,7 @@ public class Piece : MonoBehaviour
     public bool IsRed { get; set; }
     // define a connectedPieces property
     public List<Piece> Neighbors { get; set; }
+    public Vector2 ArrayPos { get; set; }
 
     [Inject]
     private void init(Vector3 vec3, Quaternion quat, Material mat)
@@ -19,6 +20,7 @@ public class Piece : MonoBehaviour
         transform.localRotation = quat;
         IsRed = mat.name == "RedPiece" ? true : false;
         Neighbors = new List<Piece>();
+        ArrayPos = new Vector2((int)vec3.x, (int)vec3.z);
     }
 
 

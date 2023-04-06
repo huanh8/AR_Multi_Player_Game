@@ -22,7 +22,7 @@ public class PlaceChessBoard : MonoBehaviour
         raycastManager = GetComponent<ARRaycastManager>();
     }
 
-    // Update is called once per frame
+
     void Update()
     {
         // raycast always performance expensive

@@ -19,6 +19,8 @@ public class BoardGenerator : MonoBehaviour
     [SerializeField] private float _boxColliderSize = 6f;
     //center of the box collider
     [SerializeField] private float _boxColliderCenter = 2.5f;
+    private GameObject[,] _boardCubes = new GameObject[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of board cubes
+
 
     // private
     Vector3 _mouseOver;                         // mouse over position
@@ -175,10 +177,12 @@ public class BoardGenerator : MonoBehaviour
         if (CheckBoundary(x, z))
             return;
         Piece p = _pieces[x, z];
+    
         if (p != null)
         {
             _selectedPiece = p;
             _startDrag = _mouseOver;
+            ShowAllAvailableMove();
         }
     }
     private void UpdatePieceDrag(Piece p)
@@ -239,7 +243,7 @@ public class BoardGenerator : MonoBehaviour
                 // set quad color
                 quad.GetComponent<Renderer>().material.color = isWhite ? Color.white : Color.black;
                 isWhite = !isWhite;
-
+                _boardCubes[i, j] = quad;
                 // create red pieces when {0,1}, {0,1}, {0,2},{1,0},{1,1},{2,0}
                 if (j < redRowLimit)
                 {
@@ -279,6 +283,8 @@ public class BoardGenerator : MonoBehaviour
     {
         p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
         SetName(x, z, p.GetComponent<Renderer>().material);
+        //update position in the array
+        p.ArrayPos = new Vector2(x, z);
     }
 
     // draw the raycast
@@ -287,5 +293,14 @@ public class BoardGenerator : MonoBehaviour
         Gizmos.color = new Color(1, 0, 0, 0.5f);
         Vector3 gizmosPosition = new Vector3(_mouseOver.x + _boardOffset.x, _mouseOver.y, _mouseOver.z + _boardOffset.z);
         Gizmos.DrawCube(gizmosPosition, Vector3.one);
+    }
+    private void ShowAllAvailableMove()
+    {
+        int x = (int)_selectedPiece.ArrayPos.x;
+        int z = (int)_selectedPiece.ArrayPos.y;
+        // show a hint gameobject on the cube on _boardCubes[x, z]' child
+        GameObject hint = _boardCubes[x, z].transform.GetChild(0).gameObject;
+        hint.SetActive(true);
+ 
     }
 }
