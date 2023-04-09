@@ -75,27 +75,23 @@ public class Piece : MonoBehaviour
 
         // add all connected neighbors and their neighbors
         List<Piece> allConnectedPiece = new List<Piece>();
+        //check allConnectedPiece and add their neighbors but not duplicate
+        List<Piece> allConnectedNeighbors = new List<Piece>();
 
         // add neighbors
         allConnectedPiece.AddRange(Neighbors);
-        //check allConnectedPiece and add their neighbors but not duplicate
-        List<Piece> newNeighbors = new List<Piece>();
-        foreach (Piece p in allConnectedPiece)
-        {
-            foreach (Piece neighbor in p.Neighbors)
-            {
-                if (!allConnectedPiece.Contains(neighbor) && !newNeighbors.Contains(neighbor))
-                {
-                    if (neighbor != this)   // remove itself from allConnectedPiece
-                    { 
-                        newNeighbors.Add(neighbor);
-                    }
-                }
-            }
-        }
-        // add new neighbors
-        allConnectedPiece.AddRange(newNeighbors);
+        AddAllConnectedNeighbor(allConnectedPiece, allConnectedNeighbors);
 
+        // add new neighbors
+        allConnectedPiece.AddRange(allConnectedNeighbors);
+        AddMovesList(board, allConnectedPiece);
+
+        RemoveItselfFormMovesList();
+        RemoveHomesFromMovesList();
+    }
+
+    private void AddMovesList(Piece[,] board, List<Piece> allConnectedPiece)
+    {
         foreach (Piece n in allConnectedPiece)
         {
             int x = (int)n.Pos.x;
@@ -119,14 +115,37 @@ public class Piece : MonoBehaviour
                 }
             }
         }
+    }
 
+    private void AddAllConnectedNeighbor(List<Piece> allConnectedPiece, List<Piece> allConnectedNeighbors)
+    {
+        foreach (Piece p in allConnectedPiece)
+        {
+            foreach (Piece neighbor in p.Neighbors)
+            {
+                if (!allConnectedPiece.Contains(neighbor) && !allConnectedNeighbors.Contains(neighbor))
+                {
+                    if (neighbor != this)   // remove itself from allConnectedPiece
+                    {
+                        allConnectedNeighbors.Add(neighbor);
+                    }
+                }
+            }
+        }
+    }
+
+    private void RemoveItselfFormMovesList()
+    {
         // remove if the neighbor include itself
         if (MovesList.Contains(this.Pos))
         {
             MovesList.Remove(this.Pos);
             Debug.Log($"{this.Pos} MovesList : {this.Pos} Removed");
         }
+    }
 
+    private void RemoveHomesFromMovesList()
+    {
         //remove if it is Red/Blue home
         for (int i = MovesList.Count - 1; i >= 0; i--)
         {
