@@ -10,6 +10,8 @@ public class Piece : MonoBehaviour
     public Vector2 Pos { get; set; }
     public List<Piece> Neighbors { get; private set; }
     public List<Vector2> MovesList { get; private set; }
+            // add all connected neighbors and their neighbors
+    public  List<Piece> AllConnectedPiece  { get; private set; }
 
     [Inject]
     private void init(Vector3 vec3, Quaternion quat, Material mat)
@@ -23,6 +25,7 @@ public class Piece : MonoBehaviour
         Neighbors = new List<Piece>();
         Pos = new Vector2((int)vec3.x, (int)vec3.z);
         MovesList = new List<Vector2>();
+        AllConnectedPiece = new List<Piece>();
     }
 
 
@@ -66,6 +69,7 @@ public class Piece : MonoBehaviour
     public void UpdateMoveList(Piece[,] board)
     {
         MovesList.Clear();
+        AllConnectedPiece.Clear();
 
         // if it is orphaned
         if (Neighbors.Count == 0)
@@ -73,26 +77,35 @@ public class Piece : MonoBehaviour
             return;
         }
 
-        // add all connected neighbors and their neighbors
-        List<Piece> allConnectedPiece = new List<Piece>();
+        // // add all connected neighbors and their neighbors
+        // List<Piece> AllConnectedPiece = new List<Piece>();
         //check allConnectedPiece and add their neighbors but not duplicate
+
         List<Piece> allConnectedNeighbors = new List<Piece>();
 
         // add neighbors
-        allConnectedPiece.AddRange(Neighbors);
-        AddAllConnectedNeighbor(allConnectedPiece, allConnectedNeighbors);
+        AllConnectedPiece.AddRange(Neighbors);
+        // Debug.Log($"!!the neighbors of {this.Pos} is {Neighbors.Count}");
+        AddAllConnectedNeighbor(allConnectedNeighbors);
 
         // add new neighbors
-        allConnectedPiece.AddRange(allConnectedNeighbors);
-        AddMovesList(board, allConnectedPiece);
+        AllConnectedPiece.AddRange(allConnectedNeighbors);
+        AddMovesList(board);
 
         RemoveItselfFormMovesList();
         RemoveHomesFromMovesList();
+
+
+        // foreach (Piece p in AllConnectedPiece)
+        // {
+        //     Debug.Log($"!{this.Pos} AllConnectedPiece : {p.Pos} and {AllConnectedPiece.Count} ");
+        // }
+        Debug.Log($"!{this.Pos} AllConnectedPiece : {AllConnectedPiece.Count} ");
     }
 
-    private void AddMovesList(Piece[,] board, List<Piece> allConnectedPiece)
+    private void AddMovesList(Piece[,] board)
     {
-        foreach (Piece n in allConnectedPiece)
+        foreach (Piece n in AllConnectedPiece)
         {
             int x = (int)n.Pos.x;
             int z = (int)n.Pos.y;
@@ -105,7 +118,7 @@ public class Piece : MonoBehaviour
                         // check if it is a neighbor except itself
                         if (Mathf.Abs(i - x) <= 1 && Mathf.Abs(j - z) <= 1 && (i != x || j != z))
                         {
-                            // check if it is around this piece
+                            // check if it is already in the list
                             if (!MovesList.Contains(new Vector2(i, j)))
                             {
                                 MovesList.Add(new Vector2(i, j));
@@ -117,22 +130,42 @@ public class Piece : MonoBehaviour
         }
     }
 
-    private void AddAllConnectedNeighbor(List<Piece> allConnectedPiece, List<Piece> allConnectedNeighbors)
+    private void AddAllConnectedNeighbor(List<Piece> allConnectedNeighbors, List<Piece> allConnectedPiece = null)
     {
+        if (allConnectedPiece == null)
+        {
+            allConnectedPiece = AllConnectedPiece;
+        }
+
+        Queue<Piece> queue = new Queue<Piece>();
+        HashSet<Piece> visited = new HashSet<Piece>();
+
         foreach (Piece p in allConnectedPiece)
         {
-            foreach (Piece neighbor in p.Neighbors)
+            queue.Enqueue(p);
+            visited.Add(p);
+        }
+
+        while (queue.Count > 0)
+        {
+            Piece current = queue.Dequeue();
+
+            foreach (Piece neighbor in current.Neighbors)
             {
-                if (!allConnectedPiece.Contains(neighbor) && !allConnectedNeighbors.Contains(neighbor))
+                if (!visited.Contains(neighbor))
                 {
-                    if (neighbor != this)   // remove itself from allConnectedPiece
-                    {
+                    visited.Add(neighbor);
+                    queue.Enqueue(neighbor);
+
+                      if (neighbor != this) 
+                      {
                         allConnectedNeighbors.Add(neighbor);
-                    }
+                      }
                 }
             }
         }
     }
+
 
     private void RemoveItselfFormMovesList()
     {
