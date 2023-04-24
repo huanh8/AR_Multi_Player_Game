@@ -76,11 +76,7 @@ public class Piece : MonoBehaviour
         {
             return;
         }
-
-        // // add all connected neighbors and their neighbors
-        // List<Piece> AllConnectedPiece = new List<Piece>();
-        //check allConnectedPiece and add their neighbors but not duplicate
-
+        
         List<Piece> allConnectedNeighbors = new List<Piece>();
 
         // add neighbors
@@ -90,17 +86,16 @@ public class Piece : MonoBehaviour
 
         // add new neighbors
         AllConnectedPiece.AddRange(allConnectedNeighbors);
-        AddMovesList(board);
 
+        // check if all pieces in AllConnectedPiece are connected to each other
+        if (!AreAllConnected(AllConnectedPiece))
+        {
+            return;
+        }
+
+        AddMovesList(board);
         RemoveItselfFormMovesList();
         RemoveHomesFromMovesList();
-
-
-        // foreach (Piece p in AllConnectedPiece)
-        // {
-        //     Debug.Log($"!{this.Pos} AllConnectedPiece : {p.Pos} and {AllConnectedPiece.Count} ");
-        // }
-        Debug.Log($"!{this.Pos} AllConnectedPiece : {AllConnectedPiece.Count} ");
     }
 
     private void AddMovesList(Piece[,] board)
@@ -130,17 +125,40 @@ public class Piece : MonoBehaviour
         }
     }
 
-    private void AddAllConnectedNeighbor(List<Piece> allConnectedNeighbors, List<Piece> allConnectedPiece = null)
+    // to check if all pieces in a list are connected to each other
+    private bool AreAllConnected(List<Piece> pieces)
     {
-        if (allConnectedPiece == null)
+        // initialize a set of visited pieces
+        HashSet<Piece> visited = new HashSet<Piece>();
+        visited.Add(pieces[0]);
+
+        // traverse the graph using depth-first search
+        Stack<Piece> stack = new Stack<Piece>();
+        stack.Push(pieces[0]);
+        while (stack.Count > 0)
         {
-            allConnectedPiece = AllConnectedPiece;
+            Piece currPiece = stack.Pop();
+            foreach (Piece neighbor in currPiece.Neighbors)
+            {
+                if (pieces.Contains(neighbor) && !visited.Contains(neighbor))
+                {
+                    visited.Add(neighbor);
+                    stack.Push(neighbor);
+                }
+            }
         }
+
+        // check if all pieces have been visited
+        return visited.Count == pieces.Count;
+    }
+
+    private void AddAllConnectedNeighbor(List<Piece> allConnectedNeighbors)
+    {
 
         Queue<Piece> queue = new Queue<Piece>();
         HashSet<Piece> visited = new HashSet<Piece>();
 
-        foreach (Piece p in allConnectedPiece)
+        foreach (Piece p in AllConnectedPiece)
         {
             queue.Enqueue(p);
             visited.Add(p);
