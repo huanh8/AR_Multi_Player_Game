@@ -5,7 +5,6 @@ using Zenject;
 
 public class BoardGenerator : MonoBehaviour
 {
-
     [SerializeField] Vector3 _pieceRotation = new Vector3(90, 0, 0);
     [SerializeField] Piece[,] _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE];   // 2D array of pieces
     [SerializeField] Material _redMaterial;
@@ -124,6 +123,7 @@ public class BoardGenerator : MonoBehaviour
             // check if its a valid move
             if (_selectedPiece.MovesList.Contains(new Vector2(x2, z2)))
             {
+                CapturedPiece( x2, z2);
                 //move the piece
                 _pieces[x2, z2] = _selectedPiece;
                 _pieces[x1, z1] = null;
@@ -141,7 +141,23 @@ public class BoardGenerator : MonoBehaviour
             }
         }
     }
+    private void CapturedPiece(int x, int z)
+    {
+        Vector2 capPosition = new Vector2(x, z);
+        // check if CapturedPositions of any piece in the board contains the position
+        foreach (Piece p in _pieces)
+        {
+            if (p != null && p.PieceType != _selectedPiece.PieceType)
+            {
+                if (p.CapturedPositions.Contains(capPosition))
+                {
+                    p.ChangeColor(_redMaterial, _blueMaterial);
+                }
+            }
+        }
+    
 
+    }
     private void EndTurn()
     {
         Debug.Log("EndTurn");
@@ -242,7 +258,6 @@ public class BoardGenerator : MonoBehaviour
                 // create blue pieces when {3,5},{4,4},{4,5},{5,3},{5,4},{5,5}
                 else if (j >= Constants.BOARD_SIZE - blueRowLimit)
                 {
-                    // GeneratePieces(i, j, quad, _bluePieceFactory);
                     GeneratePieces(i, j, _blueMaterial);
                 }
             }
@@ -307,8 +322,21 @@ public class BoardGenerator : MonoBehaviour
 
     private void SetUpAllPieces()
     {
+        ClearUp();
         SetUpPieceNeighbor();
         SetUpMovesList();
+    }
+
+    private void ClearUp()
+    {
+        foreach (Piece piece in _pieces)
+        {
+            if (piece != null)
+            {
+                piece.CapturedPositions.Clear();
+                piece.NeighborOpponents.Clear();
+            }
+        }
     }
 
     private void SetUpPieceNeighbor()
@@ -330,7 +358,7 @@ public class BoardGenerator : MonoBehaviour
             if (piece != null)
             {
                 piece.UpdateMoveList(_pieces);
-                Debug.Log($"the piece {piece.Pos} movesList is  {piece.MovesList.Count.ToString()}");
+              //  Debug.Log($"the piece {piece.Pos} movesList is  {piece.MovesList.Count.ToString()}");
             }
         }
     }
