@@ -1,12 +1,17 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
 public class Piece : MonoBehaviour
 {
-    public bool _isRed =true;
-    public bool _isKing;
+    public bool IsRed { get; set; }
+
+    public Vector2 Pos { get; set; }
+    public List<Piece> Neighbors { get; private set; }
+    public List<Vector2> MovesList { get; private set; }
+            // add all connected neighbors and their neighbors
+    public  List<Piece> AllConnectedPiece  { get; private set; }
 
     [Inject]
     private void init(Vector3 vec3, Quaternion quat, Material mat)
@@ -16,74 +21,193 @@ public class Piece : MonoBehaviour
         // change the material
         GetComponent<Renderer>().material = mat;
         transform.localRotation = quat;
-        _isRed = true;
-        _isKing = false;
+        IsRed = mat.name == "RedPiece" ? true : false;
+        Neighbors = new List<Piece>();
+        Pos = new Vector2((int)vec3.x, (int)vec3.z);
+        MovesList = new List<Vector2>();
+        AllConnectedPiece = new List<Piece>();
     }
 
 
-    public bool ValidMove(Piece[,] board, int x1, int z1, int x2, int z2)
-    {   
-        Debug.Log($"!!!!!!_isRed  {_isRed}");
-        //if we are moving on the top of another piece
-        if (board[x2, z2] != null)
-        {
-            Debug.Log("we are moving on the top of another piece");
-            return false;
-        }
 
-        int deltaMoveX = Mathf.Abs(x1 - x2);
-        int deltaMoveZ = z2 - z1;
-        Debug.Log($"deltaMoveX {deltaMoveX} deltaMoveZ {deltaMoveZ} isRed {_isRed} isKing {_isKing}");
-        if(_isRed || _isKing)
+    public List<Piece> UpdateNeighborPieces(Piece[,] board)
+    {
+        Neighbors.Clear();
+        FindNeighbor(board);
+        return Neighbors;
+    }
+
+    private void FindNeighbor(Piece[,] board, List<Piece> neighbors = null)
+    {
+        int x = (int)Pos.x;
+        int z = (int)Pos.y;
+        if (neighbors == null)
         {
-            //normal move
-            if(deltaMoveX >= 0 )
+            neighbors = Neighbors;
+        }
+        for (int i = 0; i < Constants.BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++)
             {
-                if(deltaMoveZ >= 0)
+                if (board[i, j] != null && board[i, j].IsRed == IsRed)
                 {
-                    Debug.Log($"normal move{deltaMoveX} {deltaMoveZ}");
-                    return true;
-                }
-            }
-            else if(deltaMoveX == 2)
-            {
-                if(deltaMoveZ == 2)
-                {
-                    Piece p = board[(x1 + x2) / 2, (z1 + z2) / 2];
-                    if(p != null && p._isRed != _isRed)
+                    // check if it is a neighbor except itself
+                    if (Mathf.Abs(i - x) <= 1 && Mathf.Abs(j - z) <= 1 && (i != x || j != z))
                     {
-                        return true;
+                        neighbors.Add(board[i, j]);
                     }
                 }
             }
         }
+    }
 
+    private bool CheckBackHome(int x2, int z2)
+    {
+        return (IsRed && x2 == 0 && z2 == 0) || (!IsRed && x2 == Constants.BOARD_SIZE - 1 && z2 == Constants.BOARD_SIZE - 1);
+    }
 
-        if(!_isRed || _isKing)
+    public void UpdateMoveList(Piece[,] board)
+    {
+        MovesList.Clear();
+        AllConnectedPiece.Clear();
+
+        // if it is orphaned
+        if (Neighbors.Count == 0)
         {
-            //normal move
-            if(deltaMoveX <= 1 )
+            return;
+        }
+        
+        List<Piece> allConnectedNeighbors = new List<Piece>();
+
+        // add neighbors
+        AllConnectedPiece.AddRange(Neighbors);
+        // Debug.Log($"!!the neighbors of {this.Pos} is {Neighbors.Count}");
+        AddAllConnectedNeighbor(allConnectedNeighbors);
+
+        // add new neighbors
+        AllConnectedPiece.AddRange(allConnectedNeighbors);
+
+        // check if all pieces in AllConnectedPiece are connected to each other
+        if (!AreAllConnected(AllConnectedPiece))
+        {
+            return;
+        }
+
+        AddMovesList(board);
+        RemoveItselfFormMovesList();
+        RemoveHomesFromMovesList();
+    }
+
+    private void AddMovesList(Piece[,] board)
+    {
+        foreach (Piece n in AllConnectedPiece)
+        {
+            int x = (int)n.Pos.x;
+            int z = (int)n.Pos.y;
+            for (int i = 0; i < Constants.BOARD_SIZE; i++)
             {
-                if(deltaMoveZ <= 0)
+                for (int j = 0; j < Constants.BOARD_SIZE; j++)
                 {
-                    return true;
-                }
-            }
-            else if(deltaMoveX == 2)
-            {
-                if(deltaMoveZ == -2)
-                {
-                    Piece p = board[(x1 + x2) / 2, (z1 + z2) / 2];
-                    if(p != null && p._isRed != _isRed)
+                    if (board[i, j] == null)
                     {
-                        return true;
+                        // check if it is a neighbor except itself
+                        if (Mathf.Abs(i - x) <= 1 && Mathf.Abs(j - z) <= 1 && (i != x || j != z))
+                        {
+                            // check if it is already in the list
+                            if (!MovesList.Contains(new Vector2(i, j)))
+                            {
+                                MovesList.Add(new Vector2(i, j));
+                            }
+                        }
                     }
                 }
             }
         }
-        Debug.Log($"invalid move{deltaMoveX} {deltaMoveZ}");
-        return false;
     }
 
- public class Factory : PlaceholderFactory<Vector3,Quaternion, Material,Piece> { }
+    // to check if all pieces in a list are connected to each other
+    private bool AreAllConnected(List<Piece> pieces)
+    {
+        // initialize a set of visited pieces
+        HashSet<Piece> visited = new HashSet<Piece>();
+        visited.Add(pieces[0]);
+
+        // traverse the graph using depth-first search
+        Stack<Piece> stack = new Stack<Piece>();
+        stack.Push(pieces[0]);
+        while (stack.Count > 0)
+        {
+            Piece currPiece = stack.Pop();
+            foreach (Piece neighbor in currPiece.Neighbors)
+            {
+                if (pieces.Contains(neighbor) && !visited.Contains(neighbor))
+                {
+                    visited.Add(neighbor);
+                    stack.Push(neighbor);
+                }
+            }
+        }
+
+        // check if all pieces have been visited
+        return visited.Count == pieces.Count;
+    }
+
+    private void AddAllConnectedNeighbor(List<Piece> allConnectedNeighbors)
+    {
+
+        Queue<Piece> queue = new Queue<Piece>();
+        HashSet<Piece> visited = new HashSet<Piece>();
+
+        foreach (Piece p in AllConnectedPiece)
+        {
+            queue.Enqueue(p);
+            visited.Add(p);
+        }
+
+        while (queue.Count > 0)
+        {
+            Piece current = queue.Dequeue();
+
+            foreach (Piece neighbor in current.Neighbors)
+            {
+                if (!visited.Contains(neighbor))
+                {
+                    visited.Add(neighbor);
+                    queue.Enqueue(neighbor);
+
+                      if (neighbor != this) 
+                      {
+                        allConnectedNeighbors.Add(neighbor);
+                      }
+                }
+            }
+        }
+    }
+
+
+    private void RemoveItselfFormMovesList()
+    {
+        // remove if the neighbor include itself
+        if (MovesList.Contains(this.Pos))
+        {
+            MovesList.Remove(this.Pos);
+            Debug.Log($"{this.Pos} MovesList : {this.Pos} Removed");
+        }
+    }
+
+    private void RemoveHomesFromMovesList()
+    {
+        //remove if it is Red/Blue home
+        for (int i = MovesList.Count - 1; i >= 0; i--)
+        {
+            Vector2 p = MovesList[i];
+            if (p != null && CheckBackHome((int)p.x, (int)p.y))
+            {
+                MovesList.RemoveAt(i);
+                Debug.Log($"{this.Pos} Home MovesList : {p} Removed");
+            }
+        }
+    }
+
+    public class Factory : PlaceholderFactory<Vector3, Quaternion, Material, Piece> { }
 }
