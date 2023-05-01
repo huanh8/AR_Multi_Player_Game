@@ -5,6 +5,7 @@ using Zenject;
 
 public class BoardGenerator : MonoBehaviour
 {
+    
     [SerializeField] Vector3 _pieceRotation = new Vector3(90, 0, 0);
     [SerializeField] Piece[,] _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE];   // 2D array of pieces
     [SerializeField] Material _redMaterial;
