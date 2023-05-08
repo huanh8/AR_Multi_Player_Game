@@ -6,5 +6,5 @@ public static class Constants
     public const int BOARD_SIZE = 6;
     public const string RED_NAME = "RedPiece";
     public const string BLUE_NAME = "BluePiece";
-    public enum PieceTypeList { Red, Blue }
+    public enum PieceTypeList { Red, Blue, None };
 }
