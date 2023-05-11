@@ -14,20 +14,28 @@ public class Piece : MonoBehaviour
     public  List<Piece> AllConnectedPiece  { get; private set; }
     public  HashSet<Vector2> CapturedPositions { get; private set; }
     public  HashSet<Piece> NeighborOpponents { get; private set; }
+    [SerializeField] private Material _blueMaterial;
+    [SerializeField] private Material _redMaterial;
+    [SerializeField] private AnimationController _animationController;
+    [SerializeField] private Renderer _renderer;
 
     [Inject]
-    private void init(Vector3 vec3, Quaternion quat, Material mat)
+    private void init(Vector3 vec3, Quaternion quat, PieceTypeList type)
     {
         transform.localPosition = vec3;
-        GetComponent<Renderer>().material = mat;
+        // get the renderer via its child
+        _renderer = transform.GetChild(0).GetComponent<Renderer>();
+        _renderer.material = type == PieceTypeList.Red ? _redMaterial : _blueMaterial;
         transform.localRotation = quat;
-        PieceType = (mat.name == Constants.RED_NAME ? Constants.PieceTypeList.Red : Constants.PieceTypeList.Blue);
+        PieceType = type;
         Neighbors = new HashSet<Piece>();
         Pos = new Vector2((int)vec3.x, (int)vec3.z);
         MovesList = new List<Vector2>();
         AllConnectedPiece = new List<Piece>();
         CapturedPositions = new HashSet<Vector2>();
         NeighborOpponents = new HashSet<Piece>();
+        _animationController = GetComponent<AnimationController>();
+
     }
 
     public void UpdateNeighborPieces(Piece[,] board)
@@ -177,7 +185,7 @@ public class Piece : MonoBehaviour
             // find all NeighborOpponents 
             if (n.NeighborOpponents.Count > 0)
             {
-                Debug.Log($"the opponent's neighbors of {n.Pos} is {n.NeighborOpponents.Count}");         
+                //Debug.Log($"the opponent's neighbors of {n.Pos} is {n.NeighborOpponents.Count}");         
                 foreach (Piece op in n.NeighborOpponents)
                 {
                     int x1, z1;
@@ -281,18 +289,23 @@ public class Piece : MonoBehaviour
         }
     }
 
-    public void ChangeColor(Material redMaterial, Material blueMaterial)
+    public void ChangeColor()
     { 
         if (PieceType == Constants.PieceTypeList.Red)
         {
             PieceType = Constants.PieceTypeList.Blue;
-            GetComponent<Renderer>().material = blueMaterial;     
+            _renderer.material = _blueMaterial;     
         }
         else if (PieceType == Constants.PieceTypeList.Blue)
         {
             PieceType = Constants.PieceTypeList.Red;
-            GetComponent<Renderer>().material = redMaterial;     
+            _renderer.material = _redMaterial;     
         }
+        Debug.Log($"Piece color changed");
+    }
+    public void ChangePiece()
+    {
+        _animationController.PlayFlipPieceAnimation();
     }
 
     private static bool IsNotOutBoard(int x1, int z1)
@@ -309,5 +322,5 @@ public class Piece : MonoBehaviour
         x3 = x2 + (x2 - x1);
         z3 = z2 + (z2 - z1);
     }
-    public class Factory : PlaceholderFactory<Vector3, Quaternion, Material, Piece> { }
+    public class Factory : PlaceholderFactory<UnityEngine.Vector3, Quaternion, Constants.PieceTypeList, Piece> { }
 }

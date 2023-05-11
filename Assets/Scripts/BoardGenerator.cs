@@ -2,13 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
+using static Constants;
 
 public class BoardGenerator : MonoBehaviour
 {
-    [SerializeField] Vector3 _pieceRotation = new Vector3(90, 0, 0);
+    [SerializeField] Vector3 _pieceRotation = new Vector3(0, 0, 0);
     [SerializeField] Piece[,] _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE];   // 2D array of pieces
-    [SerializeField] Material _redMaterial;
-    [SerializeField] Material _blueMaterial;
     [SerializeField] LayerMask _layerMask;
     [SerializeField] GameObject _boardCube;        // board cube object
     [SerializeField] float _offSite = 0.6f;        // offset for pieces
@@ -151,7 +150,8 @@ public class BoardGenerator : MonoBehaviour
             {
                 if (p.CapturedPositions.Contains(capPosition))
                 {
-                    p.ChangeColor(_redMaterial, _blueMaterial);
+                    Debug.Log($"Captured piece {p.name} at {x}, {z}");
+                    p.ChangePiece();
                 }
             }
         }
@@ -253,12 +253,12 @@ public class BoardGenerator : MonoBehaviour
                 // create red pieces when {0,1}, {0,1}, {0,2},{1,0},{1,1},{2,0}
                 if (j < redRowLimit)
                 {
-                    GeneratePieces(i, j, _redMaterial);
+                    GeneratePieces(i, j, Constants.PieceTypeList.Red);
                 }
                 // create blue pieces when {3,5},{4,4},{4,5},{5,3},{5,4},{5,5}
                 else if (j >= Constants.BOARD_SIZE - blueRowLimit)
                 {
-                    GeneratePieces(i, j, _blueMaterial);
+                    GeneratePieces(i, j, Constants.PieceTypeList.Blue);
                 }
             }
             redRowLimit--;
@@ -267,10 +267,10 @@ public class BoardGenerator : MonoBehaviour
         //align the board to the world coordinates
         transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
     }
-    private void GeneratePieces(int i, int j, Material material)
+    private void GeneratePieces(int i, int j, PieceTypeList pieceType)
     {
-        _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.Euler(_pieceRotation), material);
-        SetName(i, j, material);
+        _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.Euler(_pieceRotation), pieceType);
+        SetName(i, j, pieceType);
         _pieces[i, j].transform.SetParent(transform);
     }
 
@@ -279,15 +279,22 @@ public class BoardGenerator : MonoBehaviour
         return x < 0 || x >= _pieces.Length || z < 0 || z >= _pieces.Length;
     }
 
-    private void SetName(int i, int j, Material material)
+    private void SetName(int i, int j, PieceTypeList pieceType)
     {
-        _pieces[i, j].name = $"{material.name}_{i}{j}";
+        if (pieceType == PieceTypeList.Red)
+        {
+            _pieces[i, j].name = $"Red_{i}{j}";
+        }
+        else
+        {
+            _pieces[i, j].name = $"Blue_{i}{j}";
+        }
     }
 
     private void MovePiece(Piece p, int x, int z)
     {
         p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
-        SetName(x, z, p.GetComponent<Renderer>().material);
+        SetName(x, z, p.PieceType);
         //update position in the array
         p.Pos = new Vector2(x, z);
     }
