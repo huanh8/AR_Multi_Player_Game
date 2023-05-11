@@ -152,6 +152,7 @@ public class BoardGenerator : MonoBehaviour
                 {
                     Debug.Log($"Captured piece {p.name} at {x}, {z}");
                     p.ChangePiece();
+                    SetNameAndType((int)p.Pos.x, (int)p.Pos.y, _selectedPiece.PieceType);
                 }
             }
         }
@@ -270,7 +271,7 @@ public class BoardGenerator : MonoBehaviour
     private void GeneratePieces(int i, int j, PieceTypeList pieceType)
     {
         _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.Euler(_pieceRotation), pieceType);
-        SetName(i, j, pieceType);
+        SetNameAndType(i, j, pieceType);
         _pieces[i, j].transform.SetParent(transform);
     }
 
@@ -279,22 +280,16 @@ public class BoardGenerator : MonoBehaviour
         return x < 0 || x >= _pieces.Length || z < 0 || z >= _pieces.Length;
     }
 
-    private void SetName(int i, int j, PieceTypeList pieceType)
+    private void SetNameAndType(int i, int j, PieceTypeList pieceType)
     {
-        if (pieceType == PieceTypeList.Red)
-        {
-            _pieces[i, j].name = $"Red_{i}{j}";
-        }
-        else
-        {
-            _pieces[i, j].name = $"Blue_{i}{j}";
-        }
+        _pieces[i, j].name = $"{pieceType}_{i}{j}";
+        _pieces[i, j].PieceType = pieceType; 
     }
 
     private void MovePiece(Piece p, int x, int z)
     {
         p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
-        SetName(x, z, p.PieceType);
+        SetNameAndType(x, z, p.PieceType);
         //update position in the array
         p.Pos = new Vector2(x, z);
     }
@@ -365,7 +360,6 @@ public class BoardGenerator : MonoBehaviour
             if (piece != null)
             {
                 piece.UpdateMoveList(_pieces);
-              //  Debug.Log($"the piece {piece.Pos} movesList is  {piece.MovesList.Count.ToString()}");
             }
         }
     }

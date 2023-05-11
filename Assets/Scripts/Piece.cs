@@ -366,18 +366,9 @@ public class Piece : MonoBehaviour
 
     public void ChangeColor()
     { 
-        if (PieceType == Constants.PieceTypeList.Red)
-        {
-            PieceType = Constants.PieceTypeList.Blue;
-            _renderer.material = _blueMaterial;     
-        }
-        else if (PieceType == Constants.PieceTypeList.Blue)
-        {
-            PieceType = Constants.PieceTypeList.Red;
-            _renderer.material = _redMaterial;     
-        }
-        Debug.Log($"Piece color changed");
+        _renderer.material = PieceType == PieceTypeList.Red ? _redMaterial : _blueMaterial;
     }
+
     public void ChangePiece()
     {
         _animationController.PlayFlipPieceAnimation();
@@ -397,5 +388,5 @@ public class Piece : MonoBehaviour
         x3 = x2 + (x2 - x1);
         z3 = z2 + (z2 - z1);
     }
-    public class Factory : PlaceholderFactory<UnityEngine.Vector3, Quaternion, Constants.PieceTypeList, Piece> { }
+    public class Factory : PlaceholderFactory<Vector3, Quaternion, PieceTypeList, Piece> { }
 }
