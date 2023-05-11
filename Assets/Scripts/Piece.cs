@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 using static Constants;
@@ -43,19 +44,7 @@ public class Piece : MonoBehaviour
         Neighbors.Clear();
         FindNeighbor(board,PieceType);
         UpdateOpponentsNeighborPieces(board);
-
-        if (NeighborOpponents.Count > 0) { 
-           // Debug.Log($"the opponent's neighbors of {this.Pos} is {NeighborOpponents.Count}");
-        }
         UpdateOpponentCapturedPositions(board);
-
-        if (CapturedPositions.Count > 0) { 
-           // Debug.Log($"the captured positions of {this.Pos} is {CapturedPositions.Count}");
-            foreach (Vector2 v in CapturedPositions)
-            {
-           //     Debug.Log($"the captured position of {this.Pos} is {v}");
-            }
-        }
     }
 
     private void UpdateOpponentCapturedPositions(Piece[,] board)
@@ -65,7 +54,7 @@ public class Piece : MonoBehaviour
             foreach (Piece opponent in NeighborOpponents)
             {
                 int x, z;
-                FindCapPos(opponent.Pos, Pos, out x, out z);
+                FindCapturePos(opponent.Pos, Pos, out x, out z);
                 if (IsNotOutBoard(x,z))
                 {
                     if (board[x, z] == null)
@@ -147,18 +136,103 @@ public class Piece : MonoBehaviour
         AllConnectedPiece.AddRange(allConnectedNeighbors);
 
         // check if all pieces in AllConnectedPiece are connected to each other
-        if (!AreAllConnected(AllConnectedPiece))
-        {
-            return;
+        // if they are not connected, find potential connections
+        if (!IsAllPiecesConnected(AllConnectedPiece))
+        {   
+            MovesList = FindPotentialConnections(AllConnectedPiece, board);
+        }
+        else
+        { 
+            MovesList = AddMovesList(board);
         }
 
-        AddMovesList(board);
-        RemoveItselfFormMovesList();
-        RemoveHomesFromMovesList();
+        if (MovesList.Count > 0) 
+        {
+            RemoveItselfFormMovesList();
+            RemoveHomesFromMovesList();
+        }
     }
 
-    private void AddMovesList(Piece[,] board)
+    private List<Vector2> FindPotentialConnections(List<Piece> allNeighbors, Piece[,] board)
     {
+        List<Vector2> potentialConnectionsPos = new List<Vector2>();
+        List<Vector2> allNeighborsPos = new List<Vector2>();
+        Stack<Vector2> emptyPos = new Stack<Vector2>();
+
+        foreach (Piece p in allNeighbors)
+        {
+            allNeighborsPos.Add(p.Pos);
+        }
+        for (int i = 0; i < Constants.BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++)
+            {
+                if (board[i, j] == null)
+                {
+                    emptyPos.Push(new Vector2(i, j));
+                }
+            }
+        }
+        while (emptyPos.Count > 0)
+        {
+            Vector2 posToCheck = emptyPos.Pop();
+            allNeighborsPos.Add(posToCheck);
+
+            if (IsAllPosConnected(allNeighborsPos))
+            {
+                potentialConnectionsPos.Add(posToCheck);
+            }
+            allNeighborsPos.Remove(posToCheck);
+        }
+        return potentialConnectionsPos;
+    }
+
+    private bool IsAllPosConnected(List<Vector2> positions)
+    {
+        HashSet<Vector2> visited = new HashSet<Vector2>();
+        Stack<Vector2> stack = new Stack<Vector2>();
+        stack.Push(positions[0]);
+
+        while (stack.Count > 0)
+        {
+            Vector2 pos = stack.Pop();
+            visited.Add(pos);
+
+            foreach (Vector2 neighbor in GetNeighbors(pos))
+            {
+                if (!visited.Contains(neighbor) && positions.Contains(neighbor))
+                {
+                    stack.Push(neighbor);
+                }
+            }
+        }
+        return visited.Count == positions.Count;
+    }
+
+    private List<Vector2> GetNeighbors(Vector2 pos)
+    {
+        List<Vector2> neighbors = new List<Vector2>();
+
+        int x = (int)pos.x;
+        int z = (int)pos.y;
+        // find all 8 directions
+        for (int i = x - 1; i <= x + 1; i++)
+        {
+            for (int j = z - 1; j <= z + 1; j++)
+            {
+                if (IsNotOutBoard(i, j) && (i != x || j != z))
+                {
+                    neighbors.Add(new Vector2(i, j));
+                }
+            }
+        }
+        return neighbors;
+    }
+
+
+    private List<Vector2> AddMovesList(Piece[,] board)
+    {
+        List<Vector2> moveList = new List<Vector2>();
         foreach (Piece n in AllConnectedPiece)
         {
             int x = (int)n.Pos.x;
@@ -173,9 +247,9 @@ public class Piece : MonoBehaviour
                         if (Mathf.Abs(i - x) <= 1 && Mathf.Abs(j - z) <= 1 && (i != x || j != z))
                         {
                             // check if it is already in the list
-                            if (!MovesList.Contains(new Vector2(i, j)))
+                            if (!moveList.Contains(new Vector2(i, j)))
                             {
-                                MovesList.Add(new Vector2(i, j));
+                                moveList.Add(new Vector2(i, j));
                             }
                         }
                     }
@@ -185,28 +259,29 @@ public class Piece : MonoBehaviour
             // find all NeighborOpponents 
             if (n.NeighborOpponents.Count > 0)
             {
-                //Debug.Log($"the opponent's neighbors of {n.Pos} is {n.NeighborOpponents.Count}");         
+               // Debug.Log($"the opponent's neighbors of {n.Pos} is {n.NeighborOpponents.Count}");             
                 foreach (Piece op in n.NeighborOpponents)
                 {
                     int x1, z1;
-                    FindCapPos(op.Pos, n.Pos, out x1, out z1);
+                    FindCapturePos(op.Pos, n.Pos, out x1, out z1);
                     if (IsNotOutBoard(x1, z1))
                     {
                         if (board[x1, z1] == null)
                         {
-                            if (!MovesList.Contains(new Vector2(x1, z1)))
+                            if (!moveList.Contains(new Vector2(x1, z1)))
                             {
-                                MovesList.Add(new Vector2(x1, z1));
+                                moveList.Add(new Vector2(x1, z1));
                             }
                         }
                     }
                 }
             }
         }
+        return moveList;
     }
 
     // to check if all pieces in a list are connected to each other
-    private bool AreAllConnected(List<Piece> pieces)
+    private bool IsAllPiecesConnected(List<Piece> pieces)
     {
         // initialize a set of visited pieces
         HashSet<Piece> visited = new HashSet<Piece>();
@@ -313,7 +388,7 @@ public class Piece : MonoBehaviour
         return x1 >= 0 && x1 < Constants.BOARD_SIZE && z1 >= 0 && z1 < Constants.BOARD_SIZE;
     }
 
-    private void FindCapPos(Vector2 opponentPos, Vector2 pos, out int x3, out int z3)
+    private void FindCapturePos(Vector2 opponentPos, Vector2 pos, out int x3, out int z3)
     {
         int x1 = (int)pos.x;
         int z1 = (int)pos.y;
