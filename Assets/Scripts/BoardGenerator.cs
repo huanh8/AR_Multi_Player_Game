@@ -45,6 +45,7 @@ public class BoardGenerator : MonoBehaviour
         SetSizeBoxCollider();
         SetUpAllPieces();
         _isRightTurn = PieceTypeList.Red;
+        UIController.instance.SetTurns(_isRightTurn);
     }
 
     private void SetSizeBoxCollider()
@@ -162,6 +163,7 @@ public class BoardGenerator : MonoBehaviour
         Debug.Log("EndTurn");
         ResetSelectedPiece();
         _isRightTurn = _isRightTurn == PieceTypeList.Red ? PieceTypeList.Blue : PieceTypeList.Red;
+        UIController.instance.SetTurns(_isRightTurn);
     }
 
     private void ResetSelectedPiece()
@@ -181,17 +183,19 @@ public class BoardGenerator : MonoBehaviour
     private void CheckInHome()
     {
         // check if the blue piece is in the red home(the first position on the board is red'home )
-        Piece piece = _pieces[0, 0]; // red's home  
-        Piece piece1 = _pieces[Constants.BOARD_SIZE - 1, Constants.BOARD_SIZE - 1];
+        Piece redPieceHome = _pieces[0, 0]; // red's home  
+        Piece bluePieceHome = _pieces[Constants.BOARD_SIZE - 1, Constants.BOARD_SIZE - 1];
 
-        if (piece != null && piece.PieceType == PieceTypeList.Blue)
+        if (redPieceHome != null && redPieceHome.PieceType == PieceTypeList.Blue)
         {
             Debug.Log("Blue Wins!!!!");
+            UIController.instance.SetWinner(redPieceHome.PieceType);
         }
         // check if the red piece is in the blue home(the last position on the board is blue'home )
-        else if (piece1 != null && piece1.PieceType == PieceTypeList.Red)
+        else if (bluePieceHome != null && bluePieceHome.PieceType == PieceTypeList.Red)
         {
             Debug.Log("Red Wins!!!!");
+            UIController.instance.SetWinner(bluePieceHome.PieceType);
         }
         else
         {
@@ -212,7 +216,7 @@ public class BoardGenerator : MonoBehaviour
     private IEnumerator ResetGame()
     {
         Debug.Log("ResetGame");
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(5f);
         ClearBoard();
         // reset the board position
         transform.position = Vector3.zero;
@@ -242,10 +246,12 @@ public class BoardGenerator : MonoBehaviour
         if (isRedNoMoves)
         {
             Debug.Log("Blue Wins");
+            UIController.instance.SetWinner(PieceTypeList.Blue);
         }
         else if (isBlueNoMoves)
         {
             Debug.Log("Red Wins");
+            UIController.instance.SetWinner(PieceTypeList.Red);
         }
         else
         {
