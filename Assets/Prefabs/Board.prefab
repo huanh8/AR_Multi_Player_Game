@@ -45,9 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c6e5991519dc674a99764d8bfa6ad39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pieceRotation: {x: 90, y: 0, z: 0}
-  _redMaterial: {fileID: 2100000, guid: 2e09ded5b88bf584eba8b5eb285615ad, type: 2}
-  _blueMaterial: {fileID: 2100000, guid: 8b386afd9a3e19a4786d6cdd8bfab45a, type: 2}
+  _pieceRotation: {x: 0, y: 0, z: 0}
   _layerMask:
     serializedVersion: 2
     m_Bits: 0
