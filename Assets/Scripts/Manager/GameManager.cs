@@ -15,8 +15,8 @@ public class GameManager : MonoBehaviour
         _boardGenerator = boardGenerator;
     }
 
-    private  void Start()
-    {
-        _boardGenerator.ManualStart();
-    }
+    // private  void Start()
+    // {
+    //     _boardGenerator.ManualStart();
+    // }
 }

@@ -25,6 +25,7 @@ public class BoardGenerator : MonoBehaviour
     private Vector3 _endDrag;                   // end drag position
     private Piece.Factory _pieceFactory;
     [SerializeField]private PieceTypeList _isRightTurn;
+    public PlaceChessBoard placeChessBoard;
 
     [Inject]
     private void Init(
@@ -34,10 +35,10 @@ public class BoardGenerator : MonoBehaviour
         _pieceFactory = pieceFactory;
     }
 
-    public void ManualStart()
+    public void BuildBoard(Vector3 position)
     {
         _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
-        CreateBoard();
+        CreateBoard(position);
         //check if the _layerMask is set, if not set it to the default layer
         _layerMask = _layerMask == 0 ? LayerMask.GetMask(Constants.BOARD_NAME) : _layerMask;
         _camera = _camera == null ? GameObject.Find(Constants.CAMERA_NAME).GetComponent<Camera>():_camera;
@@ -217,13 +218,10 @@ public class BoardGenerator : MonoBehaviour
     {
         Debug.Log("ResetGame");
         yield return new WaitForSeconds(5f);
-        ClearBoard();
-        // reset the board position
-        transform.position = Vector3.zero;
-        ManualStart();
+        placeChessBoard.ResetChessBoard();
     }
 
-    private void ClearBoard()
+    public void ClearBoard()
     {
         foreach (Piece p in _pieces)
         {
@@ -331,7 +329,7 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    private void CreateBoard()
+    private void CreateBoard(Vector3 position)
     {
         int redRowLimit = 3;
         int blueRowLimit = -2;
@@ -363,7 +361,7 @@ public class BoardGenerator : MonoBehaviour
             blueRowLimit++;
         }
         //align the board to the world coordinates
-        transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
+        transform.position = new Vector3(position.x, 0, position.z);
     }
     private void GeneratePieces(int i, int j, PieceTypeList pieceType)
     {

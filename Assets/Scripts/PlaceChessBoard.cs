@@ -6,7 +6,8 @@ using UnityEngine.XR.ARSubsystems;
 
 public class PlaceChessBoard : MonoBehaviour
 {
-    public GameObject chessBoardPrefab;
+    //public GameObject chessBoardPrefab;
+    public BoardGenerator boardGenerator;
     private GameObject spawnObject;
     bool isPlaced;
     ARRaycastManager raycastManager;
@@ -37,7 +38,9 @@ public class PlaceChessBoard : MonoBehaviour
                     Pose hitPose = hits[0].pose;
                     if (!isPlaced)
                     {
-                        spawnObject = Instantiate(chessBoardPrefab, hitPose.position, hitPose.rotation);
+                        //spawnObject = Instantiate(chessBoardPrefab, hitPose.position, hitPose.rotation);
+                        boardGenerator.BuildBoard(hitPose.position);
+
                         isPlaced = true;
                         confirmButton.SetActive(true);
                         planeManager.enabled = false;
@@ -52,7 +55,7 @@ public class PlaceChessBoard : MonoBehaviour
     {
         if (isPlaced)
         {
-            Destroy(spawnObject);
+            boardGenerator.ClearBoard();
             isPlaced = false;
             confirmButton.SetActive(false);
             planeManager.enabled = true;
