@@ -25,6 +25,7 @@ public class BoardGenerator : MonoBehaviour
     private Vector3 _endDrag;                   // end drag position
     private Piece.Factory _pieceFactory;
     [SerializeField]private PieceTypeList _isRightTurn;
+     private GameObject _selectedEffect;
 
     [Inject]
     private void Init(
@@ -171,6 +172,7 @@ public class BoardGenerator : MonoBehaviour
         _startDrag = Vector3.zero;
         _selectedPiece = null;
         DisableAllHints(false);
+        DisableSelectedEffect();
     }
 
     private void CheckVictory()
@@ -293,7 +295,19 @@ public class BoardGenerator : MonoBehaviour
             _selectedPiece = p;
             _startDrag = _mouseOver;
             ShowAllAvailableMove();
+            ShowSelectedEffect(x,z);
         }
+    }
+    private void ShowSelectedEffect(int x, int z)
+    {
+        // show the selected effect
+        _selectedEffect = _boardCubes[x,z].transform.GetChild(1).gameObject;
+        _selectedEffect.SetActive(true);
+    }
+    private void DisableSelectedEffect()
+    {
+        // disable the selected effect
+        _selectedEffect?.SetActive(false);
     }
 
     private void UpdatePieceDrag(Piece p)
