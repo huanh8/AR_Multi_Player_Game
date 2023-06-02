@@ -11,5 +11,6 @@ public class GameInstaller : MonoInstaller
     {
         Container.Bind<BoardGenerator>().FromComponentInNewPrefab(_boardGeneratorPrefab).AsSingle();
         Container.BindFactory<Vector3, Quaternion, PieceTypeList, Piece, Piece.Factory>().FromComponentInNewPrefab(_piecePrefab).AsSingle();
+        Container.Bind<InputController>().FromNewComponentOnNewGameObject().AsSingle();
     }
 }
