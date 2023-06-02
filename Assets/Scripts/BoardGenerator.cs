@@ -21,32 +21,39 @@ public class BoardGenerator : MonoBehaviour
     private Piece _selectedPiece;               // selected piece
     private Vector3 _startDrag;                 // start drag position
     private Vector3 _endDrag;                   // end drag position
-    private Piece.Factory _pieceFactory;
+    //private Piece.Factory _pieceFactory;
     [SerializeField] private PieceTypeList _isRightTurn;
     private GameObject _selectedEffect;
     private InputController _inputController;
+    public GameObject _piecePrefab;
 
-    [Inject]
-    private void Init(Piece.Factory pieceFactory, InputController inputController)
+    // [Inject]
+    // private void Init(Piece.Factory pieceFactory, InputController inputController)
+    // {
+    //     _pieceFactory = pieceFactory;
+    //     _inputController = inputController;
+    // }
+    void Start()
     {
-        _pieceFactory = pieceFactory;
-        _inputController = inputController;
+        SetUp();
     }
-
     public void ManualStart()
     {
-
+        SetUp();
+    }
+    void SetUp() 
+    { 
+        _inputController = GetComponent<InputController>();
         _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
         CreateBoard();
         //check if the _layerMask is set, if not set it to the default layer
         _layerMask = _layerMask == 0 ? LayerMask.GetMask(Constants.BOARD_NAME) : _layerMask;
         //set box collider size
         SetSizeBoxCollider();
-        SetUpAllPieces();
         _isRightTurn = PieceTypeList.Red;
         UIController.instance.SetTurns(_isRightTurn);
+        SetUpAllPieces();
     }
-
     private void SetSizeBoxCollider()
     {
         BoxCollider boxCollider = GetComponent<BoxCollider>();
@@ -55,12 +62,8 @@ public class BoardGenerator : MonoBehaviour
     }
 
     private void Update()
-    {
+    {       
         RunGame();
-    }
-    private void LateUpdate()
-    {
-        _inputController.ResetInput();
     }
     private void RunGame()
     {
@@ -72,7 +75,6 @@ public class BoardGenerator : MonoBehaviour
         {
             int x = (int)_mouseOver.x;
             int z = (int)_mouseOver.z;
-
             if (_selectedPiece != null)
             {
                 //float the piece above the board when dragging
@@ -83,10 +85,12 @@ public class BoardGenerator : MonoBehaviour
             {
                 SelectPiece(x, z);
             }
+
             if (_inputController.IsDraggingEnded && _selectedPiece != null)
             {
                 TryMove((int)_startDrag.x, (int)_startDrag.z, x, z);
             }
+            _inputController.ResetInput();
         }
     }
 
@@ -284,12 +288,14 @@ public class BoardGenerator : MonoBehaviour
 
     private void SelectPiece(int x, int z)
     {
+        Debug.Log($"SelectPiece {x}, {z}");
         //out of bounds
         if (CheckBoundary(x, z))
             return;
 
         Piece p = _pieces[x, z];
 
+        Debug.Log($"Piece {p}");
         if (p != null)
         {
             // check if it is the right turn
@@ -351,10 +357,14 @@ public class BoardGenerator : MonoBehaviour
     }
     private void GeneratePieces(int i, int j, PieceTypeList pieceType)
     {
-        _pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.identity, pieceType);
-        SetNameAndType(i, j, pieceType);
+        //_pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.identity, pieceType);
+        _pieces[i, j] = Instantiate(_piecePrefab, new Vector3(i, _offSite, j), Quaternion.identity).GetComponent<Piece>();
         _pieces[i, j].transform.SetParent(transform);
+        _pieces[i, j].PieceType = pieceType;
+        _pieces[i, j].Pos = new Vector2((int)i, (int)j);
+        SetNameAndType(i, j, pieceType);
     }
+
 
     private bool CheckBoundary(int x, int z)
     {
@@ -421,6 +431,7 @@ public class BoardGenerator : MonoBehaviour
             }
         }
     }
+
 
     private void SetUpPieceNeighbor()
     {

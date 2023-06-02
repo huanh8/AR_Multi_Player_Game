@@ -11,6 +11,9 @@ GameObject:
   - component: {fileID: 462470342480813523}
   - component: {fileID: 462470342480813522}
   - component: {fileID: 8010027489681730814}
+  - component: {fileID: -1068957557588263385}
+  - component: {fileID: 1408926465131067869}
+  - component: {fileID: -4133603995227818047}
   m_Layer: 6
   m_Name: Board
   m_TagString: Untagged
@@ -45,18 +48,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c6e5991519dc674a99764d8bfa6ad39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pieceRotation: {x: 0, y: 0, z: 0}
   _layerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
     type: 3}
   _offSite: 0.6
   _boardOffset: {x: 0.5, y: 0, z: 0.5}
   _boxColliderSize: 6
   _boxColliderCenter: 2.5
-  _camera: {fileID: 0}
   _isRightTurn: 0
+  _piecePrefab: {fileID: 6757012476710171418, guid: b5676dfdc27ac2e48941ffed286bc889,
+    type: 3}
 --- !u!65 &8010027489681730814
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -70,3 +73,58 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0, y: 0, z: 0}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-1068957557588263385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462470342480813533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7020af4cac7bf8844b6388d31a77dd32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 0}
+--- !u!114 &1408926465131067869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462470342480813533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+--- !u!114 &-4133603995227818047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462470342480813533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df2868252ab5c4d1da357e8f11f1b524, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 0
+  SyncScaleY: 0
+  SyncScaleZ: 0
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  InLocalSpace: 0
+  Interpolate: 1

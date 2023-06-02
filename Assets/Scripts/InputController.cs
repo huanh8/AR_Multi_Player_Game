@@ -1,12 +1,10 @@
 using System;
 using UnityEngine;
+using Unity.Netcode;
 
-public class InputController : MonoBehaviour
+public class InputController : NetworkBehaviour
 {
     public bool IsDraggingPiece { get; private set; }
-    public Piece SelectedPiece { get; private set; }
-    public Vector3 StartDragPosition { get; private set; }
-    public Vector3 EndDragPosition { get; private set; }
     public bool IsDraggingEnded { get; private set; }
 
     public Camera _camera;
@@ -18,9 +16,13 @@ public class InputController : MonoBehaviour
 
     public void Update()
     {
+
         if (Input.GetMouseButtonDown(0))
         {
+            Debug.Log("!!Mouse down");
             IsDraggingPiece = true;
+            
+            Debug.Log("!!Mouse down" +IsDraggingPiece);
         }
         else if (Input.GetMouseButtonUp(0))
         {
@@ -31,9 +33,6 @@ public class InputController : MonoBehaviour
     public void ResetInput()
     {
         IsDraggingPiece = false;
-        SelectedPiece = null;
-        StartDragPosition = Vector3.zero;
-        EndDragPosition = Vector3.zero;
         IsDraggingEnded = false;
     }
     public void UpdateMouseOver(float offSite, LayerMask layerMask, out Vector3 mouseOver)
