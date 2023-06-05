@@ -7,19 +7,19 @@ using Unity.Netcode;
 
 public class BoardGenerator : NetworkBehaviour
 {
-    public NetworkVariable<Piece>[,] _pieces { get; set; } = new NetworkVariable<Piece>[Constants.BOARD_SIZE, Constants.BOARD_SIZE];
-    public LayerMask _layerMask;
-    [SerializeField] GameObject _boardCube;        // board cube object
+    public NetworkVariable<Piece>[,] _pieces = new NetworkVariable<Piece> [Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
+    public NetworkVariable< GameObject> [,] _boardCubes = new  NetworkVariable<GameObject>[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of board cubes
+    public NetworkVariable<Piece> _selectedPiece;               // selected piece
+    public GameObject _boardCubePrefab;        // board cube object
     public float _offSite = 0.6f;        // offset for pieces
     public Vector3 _boardOffset = new Vector3(0.5f, 0, 0.5f); // offset for the board
+    public LayerMask _layerMask;
 
     // size of the box collider
     [SerializeField] private float _boxColliderSize = 6f;
     //center of the box collider
     [SerializeField] private float _boxColliderCenter = 2.5f;
-    private GameObject[,] _boardCubes = new GameObject[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of board cubes
     Vector3 _mouseOver;                         // mouse over position
-    public NetworkVariable<Piece> _selectedPiece;               // selected piece
     public Vector3 _startDrag;                 // start drag position
     public Vector3 _endDrag;                   // end drag position
     //private Piece.Factory _pieceFactory;
@@ -40,10 +40,17 @@ public class BoardGenerator : NetworkBehaviour
     // }
     public void ManualStart()
     {
+        //SetUp();
+    }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
         SetUp();
     }
     void SetUp()
     {
+        //set permission for _pieces
+
         // _pieces = new NetworkVariable<Piece>[Constants.BOARD_SIZE, Constants.BOARD_SIZE];
         // _inputController = GetComponent<InputController>();
         CreateBoard();
@@ -247,9 +254,10 @@ public class BoardGenerator : NetworkBehaviour
             }
         }
         // clear board
-        foreach (GameObject boardCube in _boardCubes)
+        foreach (NetworkVariable<GameObject> boardCube in _boardCubes)
         {
-            Destroy(boardCube);
+            Destroy(boardCube.Value.gameObject);
+         
         }
     }
 
@@ -313,7 +321,7 @@ public class BoardGenerator : NetworkBehaviour
     private void ShowSelectedEffect(int x, int z)
     {
         // show the selected effect
-        _selectedEffect = _boardCubes[x, z].transform.GetChild(1).gameObject;
+        _selectedEffect = _boardCubes[x, z].Value.transform.GetChild(1).gameObject;
         _selectedEffect.SetActive(true);
     }
     private void DisableSelectedEffect()
@@ -332,13 +340,16 @@ public class BoardGenerator : NetworkBehaviour
             isWhite = !isWhite;
             for (int j = 0; j < Constants.BOARD_SIZE; j++)
             {
-                GameObject quad = Instantiate(_boardCube, new Vector3(i, 0, j), Quaternion.identity);
-                // quad.transform.SetParent(transform);
-                quad.name = $"R{i}{j}";
+                GameObject quad = Instantiate(_boardCubePrefab, new Vector3(i, 0, j), Quaternion.identity);
+
+                NetworkVariable<GameObject> networkQuad = new NetworkVariable<GameObject>(quad);
+               // set parent to the board
+                //networkQuad.Value.transform.SetParent(transform);
+                networkQuad.Value.name = $"R{i}{j}";
                 // set quad color
-                quad.GetComponent<Renderer>().material.color = isWhite ? Color.white : Color.black;
+                networkQuad.Value.GetComponent<Renderer>().material.color = isWhite ? Color.white : Color.black;
                 isWhite = !isWhite;
-                _boardCubes[i, j] = quad;
+                _boardCubes[i, j] = networkQuad;
                 // create red pieces when {0,1}, {0,1}, {0,2},{1,0},{1,1},{2,0}
                 if (j < redRowLimit)
                 {
@@ -356,7 +367,7 @@ public class BoardGenerator : NetworkBehaviour
         //align the board to the world coordinates
         transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
 
-        PrintPieces();
+       
     }
     public void PrintPieces()
     {
@@ -377,10 +388,13 @@ public class BoardGenerator : NetworkBehaviour
             // If _pieces[i, j] is null, instantiate a new GameObject and assign it to the array
             GameObject pieceObject = Instantiate(_piecePrefab, new Vector3(i, _offSite, j), Quaternion.identity);
             _pieces[i, j] = new NetworkVariable<Piece>(pieceObject.GetComponent<Piece>());
+            
         }
 
         _pieces[i, j].Value.PieceType.Value = pieceType;
         _pieces[i, j].Value.Pos = new NetworkVariable<Vector2>(new Vector2(i, j));
+       //set parent position
+       // _pieces[i, j].Value.transform.SetParent(transform);
 
         SetNameAndType(i, j, pieceType);
     }
@@ -419,7 +433,7 @@ public class BoardGenerator : NetworkBehaviour
         {
             int x1 = (int)move.Value.x;
             int z1 = (int)move.Value.y;
-            GameObject hint = _boardCubes[x1, z1].transform.GetChild(0).gameObject;
+            GameObject hint = _boardCubes[x1, z1].Value.transform.GetChild(0).gameObject;
             hint.SetActive(true);
         }
     }
@@ -427,9 +441,9 @@ public class BoardGenerator : NetworkBehaviour
     private void DisableAllHints(bool enabled)
     {
         //find all hints that are from each boardCube
-        foreach (GameObject boardCube in _boardCubes)
+        foreach (NetworkVariable<GameObject> boardCube in _boardCubes)
         {
-            GameObject hint = boardCube.transform.GetChild(0).gameObject;
+            GameObject hint = boardCube.Value.transform.GetChild(0).gameObject;
             hint.SetActive(enabled);
         }
     }
@@ -476,4 +490,6 @@ public class BoardGenerator : NetworkBehaviour
             }
         }
     }
+
+
 }

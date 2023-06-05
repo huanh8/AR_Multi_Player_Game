@@ -28,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462470342480813533}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -47,16 +47,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c6e5991519dc674a99764d8bfa6ad39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _layerMask:
-    serializedVersion: 2
-    m_Bits: 64
-  _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
+  _selectedPiece:
+    m_InternalValue: {fileID: 0}
+  _boardCubePrefab: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
     type: 3}
   _offSite: 0.6
   _boardOffset: {x: 0.5, y: 0, z: 0.5}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 64
   _boxColliderSize: 6
   _boxColliderCenter: 2.5
-  _selectedPiece: {fileID: 0}
   _startDrag: {x: 0, y: 0, z: 0}
   _endDrag: {x: 0, y: 0, z: 0}
   _isRightTurn: 0

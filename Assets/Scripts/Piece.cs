@@ -45,13 +45,14 @@ public class Piece : NetworkBehaviour
         AllConnectedPiece = new NetworkVariable<List<NetworkVariable<Piece>>>(new List<NetworkVariable<Piece>>());
         CapturedPositions = new NetworkVariable<HashSet<NetworkVariable<Vector2>>>(new HashSet<NetworkVariable<Vector2>>());
         NeighborOpponents = new NetworkVariable<HashSet<NetworkVariable<Piece>>>(new HashSet<NetworkVariable<Piece>>());
-    }
-    void Start()
-    {       
-        // get the renderer via its child
+                // get the renderer via its child
         _renderer = transform.GetChild(0).GetComponent<Renderer>();
         _renderer.material = PieceType.Value == PieceTypeList.Red ? _redMaterial : _blueMaterial;
         _animationController = GetComponent<AnimationController>();
+    }
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
     }
     public void UpdateNeighborPieces(NetworkVariable<Piece>[,] board)
     {

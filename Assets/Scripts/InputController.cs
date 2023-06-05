@@ -16,7 +16,7 @@ public class InputController : NetworkBehaviour
 
     private void Awake()
     {
-        _boardGenerator = GameObject.Find(Constants.BOARD_NAME).GetComponent<BoardGenerator>();
+        //_boardGenerator = GameObject.Find(Constants.BOARD_NAME).GetComponent<BoardGenerator>();
         _camera = _camera == null ? GameObject.Find(Constants.CAMERA_NAME).GetComponent<Camera>() : _camera;
         IsDraggingPiece = new NetworkVariable<bool>(false);
         IsDraggingEnded = new NetworkVariable<bool>(false);
@@ -24,9 +24,10 @@ public class InputController : NetworkBehaviour
     }
     public override void OnNetworkSpawn()
     {
-        //base.OnNetworkSpawn();
+        base.OnNetworkSpawn();
         IsDraggingPiece.OnValueChanged += IsDragging_OnValueChanged;
         IsDraggingEnded.OnValueChanged += IsDraggingEnded_OnValueChanged;
+        _boardGenerator = GameObject.Find(Constants.BOARD_NAME).GetComponent<BoardGenerator>();
 
     }
     void Update()
@@ -44,8 +45,6 @@ public class InputController : NetworkBehaviour
         {
              IsDraggingPiece.Value = true;
             _boardGenerator.SelectPiece(x, z);
-            _boardGenerator.PrintPieces();
-
         }
         if (Input.GetMouseButtonUp(0))
         {
