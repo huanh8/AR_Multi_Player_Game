@@ -4,37 +4,76 @@ using Unity.Netcode;
 
 public class InputController : NetworkBehaviour
 {
-    public bool IsDraggingPiece { get; private set; }
-    public bool IsDraggingEnded { get; private set; }
+
+    public NetworkVariable<bool> IsDraggingPiece { get; private set; }
+    public NetworkVariable<bool> IsDraggingEnded { get; private set; }
+    // get reference of the board in the scene
+    public BoardGenerator _boardGenerator; 
+    public Vector3 _mouseOver; // the position of the mouse over the board
+
 
     public Camera _camera;
 
     private void Awake()
     {
+        _boardGenerator = GameObject.Find(Constants.BOARD_NAME).GetComponent<BoardGenerator>();
         _camera = _camera == null ? GameObject.Find(Constants.CAMERA_NAME).GetComponent<Camera>() : _camera;
+        IsDraggingPiece = new NetworkVariable<bool>(false);
+        IsDraggingEnded = new NetworkVariable<bool>(false);
+        _mouseOver = new Vector3(-1, -1, -1);
     }
-
-    public void Update()
+    public override void OnNetworkSpawn()
     {
+        //base.OnNetworkSpawn();
+        IsDraggingPiece.OnValueChanged += IsDragging_OnValueChanged;
+        IsDraggingEnded.OnValueChanged += IsDraggingEnded_OnValueChanged;
 
+    }
+    void Update()
+    {                         
+        UpdateMouseOver(_boardGenerator._offSite, _boardGenerator._layerMask, out Vector3 _mouseOver);
+        int x = (int)_mouseOver.x;
+        int z = (int)_mouseOver.z;
+
+        if (_boardGenerator._selectedPiece != null && _boardGenerator._selectedPiece.Value != null)
+        {   
+            Debug.Log("Piece selected: " + _boardGenerator._selectedPiece.Value.name);
+            _boardGenerator._selectedPiece.Value.transform.position = UpdateDragPosition(_boardGenerator._layerMask, _boardGenerator._boardOffset);
+        }
         if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log("!!Mouse down");
-            IsDraggingPiece = true;
-            
-            Debug.Log("!!Mouse down" +IsDraggingPiece);
+             IsDraggingPiece.Value = true;
+            _boardGenerator.SelectPiece(x, z);
+            _boardGenerator.PrintPieces();
+
         }
-        else if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0))
         {
-            IsDraggingEnded = true;
+            IsDraggingEnded.Value = true;
+            _boardGenerator.TryMove((int)_boardGenerator._startDrag.x, (int)_boardGenerator._startDrag.z, x, z);
         }
     }
+    private void LateUpdate()
+    {
+        ResetInput();
+    }
+    private void IsDragging_OnValueChanged(bool previousValue, bool newValue)
+    {
+            Debug.Log($"IsDragging value changed to {newValue});");
+    }
+
+    private void IsDraggingEnded_OnValueChanged(bool previousValue, bool newValue)
+    {
+        Debug.Log($"IsDraggingEnded value changed to {newValue});"); 
+    }
+
 
     public void ResetInput()
     {
-        IsDraggingPiece = false;
-        IsDraggingEnded = false;
+        IsDraggingPiece.Value = false;
+        IsDraggingEnded.Value = false;
     }
+
     public void UpdateMouseOver(float offSite, LayerMask layerMask, out Vector3 mouseOver)
     {
         mouseOver = new Vector3(-1, -1, -1);

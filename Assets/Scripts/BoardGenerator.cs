@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 using static Constants;
+using Unity.Netcode;
 
-public class BoardGenerator : MonoBehaviour
+public class BoardGenerator : NetworkBehaviour
 {
-    [SerializeField] Piece[,] _pieces;   // 2D array of pieces
-    [SerializeField] LayerMask _layerMask;
+    public NetworkVariable<Piece>[,] _pieces { get; set; } = new NetworkVariable<Piece>[Constants.BOARD_SIZE, Constants.BOARD_SIZE];
+    public LayerMask _layerMask;
     [SerializeField] GameObject _boardCube;        // board cube object
-    [SerializeField] float _offSite = 0.6f;        // offset for pieces
-    [SerializeField] Vector3 _boardOffset = new Vector3(0.5f, 0, 0.5f); // offset for the board
+    public float _offSite = 0.6f;        // offset for pieces
+    public Vector3 _boardOffset = new Vector3(0.5f, 0, 0.5f); // offset for the board
 
     // size of the box collider
     [SerializeField] private float _boxColliderSize = 6f;
@@ -18,13 +19,13 @@ public class BoardGenerator : MonoBehaviour
     [SerializeField] private float _boxColliderCenter = 2.5f;
     private GameObject[,] _boardCubes = new GameObject[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of board cubes
     Vector3 _mouseOver;                         // mouse over position
-    private Piece _selectedPiece;               // selected piece
-    private Vector3 _startDrag;                 // start drag position
-    private Vector3 _endDrag;                   // end drag position
+    public NetworkVariable<Piece> _selectedPiece;               // selected piece
+    public Vector3 _startDrag;                 // start drag position
+    public Vector3 _endDrag;                   // end drag position
     //private Piece.Factory _pieceFactory;
     [SerializeField] private PieceTypeList _isRightTurn;
     private GameObject _selectedEffect;
-    private InputController _inputController;
+    // private InputController _inputController;
     public GameObject _piecePrefab;
 
     // [Inject]
@@ -33,18 +34,18 @@ public class BoardGenerator : MonoBehaviour
     //     _pieceFactory = pieceFactory;
     //     _inputController = inputController;
     // }
-    void Start()
-    {
-        SetUp();
-    }
+    // void Start()
+    // {
+    //     SetUp();
+    // }
     public void ManualStart()
     {
         SetUp();
     }
-    void SetUp() 
-    { 
-        _inputController = GetComponent<InputController>();
-        _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
+    void SetUp()
+    {
+        // _pieces = new NetworkVariable<Piece>[Constants.BOARD_SIZE, Constants.BOARD_SIZE];
+        // _inputController = GetComponent<InputController>();
         CreateBoard();
         //check if the _layerMask is set, if not set it to the default layer
         _layerMask = _layerMask == 0 ? LayerMask.GetMask(Constants.BOARD_NAME) : _layerMask;
@@ -53,6 +54,7 @@ public class BoardGenerator : MonoBehaviour
         _isRightTurn = PieceTypeList.Red;
         UIController.instance.SetTurns(_isRightTurn);
         SetUpAllPieces();
+        _selectedPiece = new NetworkVariable<Piece>(null);
     }
     private void SetSizeBoxCollider()
     {
@@ -62,39 +64,40 @@ public class BoardGenerator : MonoBehaviour
     }
 
     private void Update()
-    {       
+    {
         RunGame();
     }
     private void RunGame()
     {
         if (_isRightTurn == PieceTypeList.None)
             return;
-        _inputController.UpdateMouseOver(_offSite, _layerMask, out _mouseOver);
+        // _inputController.UpdateMouseOver(_offSite, _layerMask, out _mouseOver);
+
         //if it is my turn
-        if (true)
+        //if (true)
         {
-            int x = (int)_mouseOver.x;
-            int z = (int)_mouseOver.z;
-            if (_selectedPiece != null)
-            {
-                //float the piece above the board when dragging
-                _selectedPiece.transform.position = _inputController.UpdateDragPosition(_layerMask, _boardOffset);
-            }
+            // int x = (int)_mouseOver.x;
+            // int z = (int)_mouseOver.z;
+            // if (_selectedPiece != null)
+            // {
+            //     //float the piece above the board when dragging
+            //     // _selectedPiece.transform.position = _inputController.UpdateDragPosition(_layerMask, _boardOffset);
+            // }
 
-            if (_inputController.IsDraggingPiece)
-            {
-                SelectPiece(x, z);
-            }
+            //if (_inputController.IsDraggingPiece.Value)
+            // {
+            //     SelectPiece(x, z);
+            // }
 
-            if (_inputController.IsDraggingEnded && _selectedPiece != null)
-            {
-                TryMove((int)_startDrag.x, (int)_startDrag.z, x, z);
-            }
-            _inputController.ResetInput();
+            //if (_inputController.IsDraggingEnded.Value && _selectedPiece != null)
+            // {
+            //     TryMove((int)_startDrag.x, (int)_startDrag.z, x, z);
+            // }
+            // _inputController.ResetInput();
         }
     }
 
-    private void TryMove(int x1, int z1, int x2, int z2)
+    public void TryMove(int x1, int z1, int x2, int z2)
     {
         _startDrag = new Vector3(x1, 0, z1);
         _endDrag = new Vector3(x2, 0, z2);
@@ -103,7 +106,7 @@ public class BoardGenerator : MonoBehaviour
         // if it out of the board will reset the selected piece
         if (CheckBoundary(x2, z2))
         {
-            if (_selectedPiece != null)
+            if (_selectedPiece != null && _selectedPiece.Value != null)
             {
                 MovePiece(_selectedPiece, x1, z1);
                 ResetSelectedPiece();
@@ -130,7 +133,7 @@ public class BoardGenerator : MonoBehaviour
             }
 
             // check if its a valid move
-            if (_selectedPiece.MovesList.Contains(new Vector2(x2, z2)))
+            if (_selectedPiece.Value.MovesList.Value.Contains(new NetworkVariable<Vector2>(new Vector2(x2, z2))))
             {
                 CapturedPiece(x2, z2);
                 //move the piece
@@ -153,17 +156,17 @@ public class BoardGenerator : MonoBehaviour
     }
     private void CapturedPiece(int x, int z)
     {
-        Vector2 capPosition = new Vector2(x, z);
+        NetworkVariable<Vector2> capPosition = new NetworkVariable<Vector2>(new Vector2(x, z));
         // check if CapturedPositions of any piece in the board contains the position
-        foreach (Piece p in _pieces)
+        foreach (NetworkVariable<Piece> p in _pieces)
         {
-            if (p != null && p.PieceType != _selectedPiece.PieceType)
+            if (p != null && p.Value.PieceType != _selectedPiece.Value.PieceType)
             {
-                if (p.CapturedPositions.Contains(capPosition))
+                if (p.Value.CapturedPositions.Value.Contains(capPosition))
                 {
-                    Debug.Log($"Captured piece {p.name} at {x}, {z}");
-                    p.ChangePiece();
-                    SetNameAndType((int)p.Pos.x, (int)p.Pos.y, _selectedPiece.PieceType);
+                    Debug.Log($"Captured piece {p.Value.name} at {x}, {z}");
+                    p.Value.ChangePiece();
+                    SetNameAndType((int)x, (int)z, _selectedPiece.Value.PieceType.Value);
                 }
             }
         }
@@ -194,19 +197,19 @@ public class BoardGenerator : MonoBehaviour
     private void CheckInHome()
     {
         // check if the blue piece is in the red home(the first position on the board is red'home )
-        Piece redPieceHome = _pieces[0, 0]; // red's home  
-        Piece bluePieceHome = _pieces[Constants.BOARD_SIZE - 1, Constants.BOARD_SIZE - 1];
+        NetworkVariable<Piece> redPieceHome = _pieces[0, 0]; // red's home  
+        NetworkVariable<Piece> bluePieceHome = _pieces[Constants.BOARD_SIZE - 1, Constants.BOARD_SIZE - 1];
 
-        if (redPieceHome != null && redPieceHome.PieceType == PieceTypeList.Blue)
+        if (redPieceHome != null && redPieceHome.Value.PieceType.Value == PieceTypeList.Blue)
         {
             Debug.Log("Blue Wins!!!!");
-            UIController.instance.SetWinner(redPieceHome.PieceType);
+            UIController.instance.SetWinner(redPieceHome.Value.PieceType.Value);
         }
         // check if the red piece is in the blue home(the last position on the board is blue'home )
-        else if (bluePieceHome != null && bluePieceHome.PieceType == PieceTypeList.Red)
+        else if (bluePieceHome != null && bluePieceHome.Value.PieceType.Value == PieceTypeList.Red)
         {
             Debug.Log("Red Wins!!!!");
-            UIController.instance.SetWinner(bluePieceHome.PieceType);
+            UIController.instance.SetWinner(bluePieceHome.Value.PieceType.Value);
         }
         else
         {
@@ -236,11 +239,11 @@ public class BoardGenerator : MonoBehaviour
 
     private void ClearBoard()
     {
-        foreach (Piece p in _pieces)
+        foreach (NetworkVariable<Piece> p in _pieces)
         {
             if (p != null)
             {
-                Destroy(p.gameObject);
+                Destroy(p.Value.gameObject);
             }
         }
         // clear board
@@ -275,9 +278,9 @@ public class BoardGenerator : MonoBehaviour
     {
         // check if there is any moves left for both side
         {
-            foreach (Piece piece in _pieces)
+            foreach (NetworkVariable<Piece> piece in _pieces)
             {
-                if (piece != null && piece.PieceType == pieceType && piece.MovesList.Count > 0)
+                if (piece != null && piece.Value.PieceType.Value == pieceType && piece.Value.MovesList.Value.Count > 0)
                 {
                     return false;
                 }
@@ -286,20 +289,18 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    private void SelectPiece(int x, int z)
+    public void SelectPiece(int x, int z)
     {
-        Debug.Log($"SelectPiece {x}, {z}");
+        Debug.Log($"!SelectPiece {x}, {z}");
         //out of bounds
         if (CheckBoundary(x, z))
             return;
-
-        Piece p = _pieces[x, z];
-
-        Debug.Log($"Piece {p}");
-        if (p != null)
+        NetworkVariable<Piece> p = _pieces[x, z];
+        if (p != null && p.Value != null)
         {
+            Debug.Log($"!!!!!!!SelectPiece {p.Value.Pos.Value.x}and {p.Value.Pos.Value.y}");
             // check if it is the right turn
-            if (p.PieceType != _isRightTurn)
+            if (p.Value.PieceType.Value != _isRightTurn)
             {
                 return;
             }
@@ -332,7 +333,7 @@ public class BoardGenerator : MonoBehaviour
             for (int j = 0; j < Constants.BOARD_SIZE; j++)
             {
                 GameObject quad = Instantiate(_boardCube, new Vector3(i, 0, j), Quaternion.identity);
-                quad.transform.SetParent(transform);
+                // quad.transform.SetParent(transform);
                 quad.name = $"R{i}{j}";
                 // set quad color
                 quad.GetComponent<Renderer>().material.color = isWhite ? Color.white : Color.black;
@@ -354,35 +355,55 @@ public class BoardGenerator : MonoBehaviour
         }
         //align the board to the world coordinates
         transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
+
+        PrintPieces();
+    }
+    public void PrintPieces()
+    {
+        Debug.Log("!!PrintPieces!!!!");
+        foreach (NetworkVariable<Piece> p in _pieces)
+        {
+            if (p != null && p.Value != null)
+            {
+                Debug.Log($"!!!Piece {p.Value.PieceType} at {p.Value.Pos}!!!!");
+            }
+        }
     }
     private void GeneratePieces(int i, int j, PieceTypeList pieceType)
     {
         //_pieces[i, j] = _pieceFactory.Create(new Vector3(i, _offSite, j), Quaternion.identity, pieceType);
-        _pieces[i, j] = Instantiate(_piecePrefab, new Vector3(i, _offSite, j), Quaternion.identity).GetComponent<Piece>();
-        _pieces[i, j].transform.SetParent(transform);
-        _pieces[i, j].PieceType = pieceType;
-        _pieces[i, j].Pos = new Vector2((int)i, (int)j);
+        if (_pieces[i, j] == null)
+        {
+            // If _pieces[i, j] is null, instantiate a new GameObject and assign it to the array
+            GameObject pieceObject = Instantiate(_piecePrefab, new Vector3(i, _offSite, j), Quaternion.identity);
+            _pieces[i, j] = new NetworkVariable<Piece>(pieceObject.GetComponent<Piece>());
+        }
+
+        _pieces[i, j].Value.PieceType.Value = pieceType;
+        _pieces[i, j].Value.Pos = new NetworkVariable<Vector2>(new Vector2(i, j));
+
         SetNameAndType(i, j, pieceType);
     }
 
 
     private bool CheckBoundary(int x, int z)
     {
-        return x < 0 || x >= _pieces.Length || z < 0 || z >= _pieces.Length;
+        // return x < 0 || x >= _pieces.Length || z < 0 || z >= _pieces.Length;
+        return x < 0 || x >= _pieces.GetLength(0) || z < 0 || z >= _pieces.GetLength(1);
     }
 
     private void SetNameAndType(int i, int j, PieceTypeList pieceType)
     {
-        _pieces[i, j].name = $"{pieceType}_{i}{j}";
-        _pieces[i, j].PieceType = pieceType;
+        _pieces[i, j].Value.name = $"{pieceType}_{i}{j}";
+        _pieces[i, j].Value.PieceType.Value = pieceType;
     }
 
-    private void MovePiece(Piece p, int x, int z)
+    private void MovePiece(NetworkVariable<Piece> p, int x, int z)
     {
-        p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
-        SetNameAndType(x, z, p.PieceType);
+        p.Value.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
+        SetNameAndType(x, z, p.Value.PieceType.Value);
         //update position in the array
-        p.Pos = new Vector2(x, z);
+        p.Value.Pos = new NetworkVariable<Vector2>(new Vector2(x, z));
     }
 
     // draw the raycast
@@ -394,10 +415,10 @@ public class BoardGenerator : MonoBehaviour
     }
     private void ShowAllAvailableMove()
     {
-        foreach (Vector2 move in _selectedPiece.MovesList)
+        foreach (NetworkVariable<Vector2> move in _selectedPiece.Value.MovesList.Value)
         {
-            int x1 = (int)move.x;
-            int z1 = (int)move.y;
+            int x1 = (int)move.Value.x;
+            int z1 = (int)move.Value.y;
             GameObject hint = _boardCubes[x1, z1].transform.GetChild(0).gameObject;
             hint.SetActive(true);
         }
@@ -422,12 +443,12 @@ public class BoardGenerator : MonoBehaviour
 
     private void ClearUp()
     {
-        foreach (Piece piece in _pieces)
+        foreach (NetworkVariable<Piece> piece in _pieces)
         {
             if (piece != null)
             {
-                piece.CapturedPositions.Clear();
-                piece.NeighborOpponents.Clear();
+                piece.Value.CapturedPositions.Value.Clear();
+                piece.Value.NeighborOpponents.Value.Clear();
             }
         }
     }
@@ -436,22 +457,22 @@ public class BoardGenerator : MonoBehaviour
     private void SetUpPieceNeighbor()
     {
         //update all pieces neighbors
-        foreach (Piece piece in _pieces)
+        foreach (NetworkVariable<Piece> piece in _pieces)
         {
             if (piece != null)
             {
-                piece.UpdateNeighborPieces(_pieces);
+                piece.Value.UpdateNeighborPieces(_pieces);
             }
         }
     }
     private void SetUpMovesList()
     {
         //update all pieces movesList
-        foreach (Piece piece in _pieces)
+        foreach (NetworkVariable<Piece> piece in _pieces)
         {
             if (piece != null)
             {
-                piece.UpdateMoveList(_pieces);
+                piece.Value.UpdateMoveList(_pieces);
             }
         }
     }

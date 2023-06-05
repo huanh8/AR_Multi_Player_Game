@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6431912323031427213}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 2, y: 1, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -111,6 +111,7 @@ GameObject:
   - component: {fileID: 3245973599647576227}
   - component: {fileID: 441350648838018837}
   - component: {fileID: 572751066301718495}
+  - component: {fileID: -4785046747898517722}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -208,3 +209,18 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+--- !u!114 &-4785046747898517722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6431912324581388913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7020af4cac7bf8844b6388d31a77dd32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _boardGenerator: {fileID: 0}
+  _mouseOver: {x: 0, y: 0, z: 0}
+  _camera: {fileID: 0}
