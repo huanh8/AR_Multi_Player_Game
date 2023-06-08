@@ -183,7 +183,7 @@ public class BoardGenerator : MonoBehaviour
         CheckVictory();
     }
 
-    private void CapturedPiece(int x, int z)
+    private void CapturedPiece(int x, int z )
     {
         Vector2 capPosition = new Vector2(x, z);
         // check if CapturedPositions of any piece in the board contains the position

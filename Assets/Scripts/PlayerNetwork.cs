@@ -6,15 +6,14 @@ using static Constants;
 
 public class PlayerNetwork : NetworkBehaviour
 {
-    [SerializeField] private Camera _camera;
-    [SerializeField] private Vector3 _cameraOffset = new Vector3(6, 10, 7);
-    [SerializeField] private Vector3 _cameraOffsetRotated = new Vector3(65, 225, 0);
-    [SerializeField] private int _clientOffset = -1;
+    [SerializeField]private Camera _camera;
+    [SerializeField]private Vector3 _cameraOffset = new Vector3(6, 10, 7);
+    [SerializeField]private Vector3 _cameraOffsetRotated = new Vector3(65, 225, 0);
+    [SerializeField]private int _clientOffset = -1;
 
     // private NetworkVariable<int> _randomNumber = new NetworkVariable<int>(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-    public struct MyCustomData : INetworkSerializable
-    {
-        public int x1, z1, x2, z2;
+    public struct MyCustomData : INetworkSerializable{
+        public int x1,z1, x2, z2;
         public PieceTypeList PieceType;
         public bool _myBool;
 
