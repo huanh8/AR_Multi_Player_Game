@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using static Constants;
 
 public class PlayerNetwork : NetworkBehaviour
 {
@@ -9,13 +10,12 @@ public class PlayerNetwork : NetworkBehaviour
     [SerializeField]private Vector3 _cameraOffset = new Vector3(6, 10, 7);
     [SerializeField]private Vector3 _cameraOffsetRotated = new Vector3(65, 225, 0);
     [SerializeField]private int _clientOffset = -1;
-
-
+    public Piece selectPiece = new Piece();
 
     // private NetworkVariable<int> _randomNumber = new NetworkVariable<int>(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     public struct MyCustomData : INetworkSerializable{
         public int x1,z1, x2, z2;
-
+        public PieceTypeList PieceType;
         public bool _myBool;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -24,8 +24,7 @@ public class PlayerNetwork : NetworkBehaviour
             serializer.SerializeValue(ref z1);
             serializer.SerializeValue(ref x2);
             serializer.SerializeValue(ref z2);
-            serializer.SerializeValue(ref _myBool);
-
+            serializer.SerializeValue(ref PieceType);
         }
     }
 
@@ -97,7 +96,7 @@ public class PlayerNetwork : NetworkBehaviour
             // call OnpieceMove
         }
     }
-    private void OnPieceMove(int x1, int z1, int x2, int z2)
+    private void OnPieceMove(int x1, int z1, int x2, int z2, Piece piece)
     {
         if (!IsOwner) return;
         _movePositionData.Value = new MyCustomData{
@@ -105,6 +104,7 @@ public class PlayerNetwork : NetworkBehaviour
             z1 = z1,
             x2 = x2,
             z2 = z2,
+            PieceType = piece.PieceType,
             // _myBool = true,
         };
         Debug.Log($"!!!OwnerClientId is {OwnerClientId} the change is from {x1}, {z1} to {x2}, {z2}");
@@ -125,7 +125,7 @@ public class PlayerNetwork : NetworkBehaviour
      if (!IsOwner)
      {
             Debug.Log($"!!!!!!!!!!!!!!!!!!move client");
-            BoardGenerator.Instance.MovePieceEvent(newValue.x1, newValue.z1, newValue.x2, newValue.z2);
+            BoardGenerator.Instance.MovePieceEvent(newValue.x1, newValue.z1, newValue.x2, newValue.z2 , newValue.PieceType);
      }
     }
 }

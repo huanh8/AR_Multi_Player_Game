@@ -30,7 +30,7 @@ public class BoardGenerator : MonoBehaviour
     private InputController _inputController;
     public GameObject _piecePrefab;
     // create a public event and pass x1 x2 z1 z2
-    public static event Action<int, int, int, int> OnPieceMoveEvent;
+    public static event Action<int, int, int, int, Piece> OnPieceMoveEvent;
 
     // [Inject]
     // private void Init(Piece.Factory pieceFactory, InputController inputController)
@@ -149,7 +149,7 @@ public class BoardGenerator : MonoBehaviour
             if (_selectedPiece.MovesList.Contains(new Vector2(x2, z2)))
             {
                 // trigger an event and pass x1 x2 z1 z2
-                OnPieceMoveEvent?.Invoke(x1, z1, x2, z2);
+                OnPieceMoveEvent?.Invoke(x1, z1, x2, z2, _selectedPiece);
 
                 MovePieceEvent(x1, z1, x2, z2);
             }
@@ -164,19 +164,25 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    public void MovePieceEvent(int x1, int z1, int x2, int z2)
+    public void MovePieceEvent(int x1, int z1, int x2, int z2 , PieceTypeList pieceType = PieceTypeList.None)
     {
+        if (pieceType != PieceTypeList.None)
+        {
+             _selectedPiece = _pieces[x1, z1];
+        }
+
         CapturedPiece(x2, z2);
         //move the piece
-        _pieces[x2, z2] = _selectedPiece;
+        _pieces[x2, z2] =  _pieces[x1, z1];
         _pieces[x1, z1] = null;
+
         MovePiece(_selectedPiece, x2, z2);
         SetUpAllPieces();
         EndTurn();
         CheckVictory();
     }
 
-    private void CapturedPiece(int x, int z)
+    private void CapturedPiece(int x, int z )
     {
         Vector2 capPosition = new Vector2(x, z);
         // check if CapturedPositions of any piece in the board contains the position
