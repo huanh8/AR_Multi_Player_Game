@@ -8,12 +8,15 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/ExampleAssets/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/AR_Demo.unity
     guid: 262cd30006ce7434d84ac62b9d0dad8d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: f8c36caa794e35a418e4b18e86ec7309
+  - enabled: 1
+    path: Assets/Scenes/GamePlay.unity
+    guid: 097a4d7411e08444a9f17d038195f9ea
   m_configObjects:
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: 744b813df90924c169af73489b8325de,
       type: 2}
