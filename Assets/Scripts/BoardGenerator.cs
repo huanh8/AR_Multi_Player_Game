@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 using static Constants;
+using System;
+using UnityEngine.Events;
 
 public class BoardGenerator : MonoBehaviour
 {
+    public static BoardGenerator  Instance { get; private set; }
     [SerializeField] Piece[,] _pieces;   // 2D array of pieces
     [SerializeField] LayerMask _layerMask;
     [SerializeField] GameObject _boardCube;        // board cube object
     [SerializeField] float _offSite = 0.6f;        // offset for pieces
-    [SerializeField] Vector3 _boardOffset = new Vector3(0.5f, 0, 0.5f); // offset for the board
+    public Vector3 BoardOffset = new Vector3(0.5f, 0, 0.5f); // offset for the board
 
     // size of the box collider
     [SerializeField] private float _boxColliderSize = 6f;
@@ -18,7 +21,7 @@ public class BoardGenerator : MonoBehaviour
     [SerializeField] private float _boxColliderCenter = 2.5f;
     private GameObject[,] _boardCubes = new GameObject[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of board cubes
     Vector3 _mouseOver;                         // mouse over position
-    private Piece _selectedPiece;               // selected piece
+    public Piece _selectedPiece;               // selected piece
     private Vector3 _startDrag;                 // start drag position
     private Vector3 _endDrag;                   // end drag position
     //private Piece.Factory _pieceFactory;
@@ -26,6 +29,8 @@ public class BoardGenerator : MonoBehaviour
     private GameObject _selectedEffect;
     private InputController _inputController;
     public GameObject _piecePrefab;
+    // create a public event and pass x1 x2 z1 z2
+    public static event Action<int, int, int, int> OnPieceMoveEvent;
 
     // [Inject]
     // private void Init(Piece.Factory pieceFactory, InputController inputController)
@@ -33,6 +38,17 @@ public class BoardGenerator : MonoBehaviour
     //     _pieceFactory = pieceFactory;
     //     _inputController = inputController;
     // }
+    private void Awake() {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+    }
+
     void Start()
     {
         SetUp();
@@ -78,7 +94,7 @@ public class BoardGenerator : MonoBehaviour
             if (_selectedPiece != null)
             {
                 //float the piece above the board when dragging
-                _selectedPiece.transform.position = _inputController.UpdateDragPosition(_layerMask, _boardOffset);
+                _selectedPiece.transform.position = _inputController.UpdateDragPosition(_layerMask);
             }
 
             if (_inputController.IsDraggingPiece)
@@ -132,14 +148,10 @@ public class BoardGenerator : MonoBehaviour
             // check if its a valid move
             if (_selectedPiece.MovesList.Contains(new Vector2(x2, z2)))
             {
-                CapturedPiece(x2, z2);
-                //move the piece
-                _pieces[x2, z2] = _selectedPiece;
-                _pieces[x1, z1] = null;
-                MovePiece(_selectedPiece, x2, z2);
-                SetUpAllPieces();
-                EndTurn();
-                CheckVictory();
+                // trigger an event and pass x1 x2 z1 z2
+                OnPieceMoveEvent?.Invoke(x1, z1, x2, z2);
+
+                MovePieceEvent(x1, z1, x2, z2);
             }
             else
             {
@@ -151,6 +163,19 @@ public class BoardGenerator : MonoBehaviour
             }
         }
     }
+
+    public void MovePieceEvent(int x1, int z1, int x2, int z2)
+    {
+        CapturedPiece(x2, z2);
+        //move the piece
+        _pieces[x2, z2] = _selectedPiece;
+        _pieces[x1, z1] = null;
+        MovePiece(_selectedPiece, x2, z2);
+        SetUpAllPieces();
+        EndTurn();
+        CheckVictory();
+    }
+
     private void CapturedPiece(int x, int z)
     {
         Vector2 capPosition = new Vector2(x, z);
@@ -173,7 +198,7 @@ public class BoardGenerator : MonoBehaviour
         Debug.Log("EndTurn");
         ResetSelectedPiece();
         _isRightTurn = _isRightTurn == PieceTypeList.Red ? PieceTypeList.Blue : PieceTypeList.Red;
-        UIController.instance.SetTurns(_isRightTurn);
+        UIController.instance.SetTurns(_isRightTurn);   
     }
 
     private void ResetSelectedPiece()
@@ -353,7 +378,7 @@ public class BoardGenerator : MonoBehaviour
             blueRowLimit++;
         }
         //align the board to the world coordinates
-        transform.position = new Vector3(_boardOffset.x, 0, _boardOffset.z);
+        transform.position = new Vector3(BoardOffset.x, 0, BoardOffset.z);
     }
     private void GeneratePieces(int i, int j, PieceTypeList pieceType)
     {
@@ -379,7 +404,7 @@ public class BoardGenerator : MonoBehaviour
 
     private void MovePiece(Piece p, int x, int z)
     {
-        p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + _boardOffset;
+        p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + BoardOffset;
         SetNameAndType(x, z, p.PieceType);
         //update position in the array
         p.Pos = new Vector2(x, z);
@@ -389,7 +414,7 @@ public class BoardGenerator : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = new Color(1, 0, 0, 0.5f);
-        Vector3 gizmosPosition = new Vector3(_mouseOver.x + _boardOffset.x, _mouseOver.y, _mouseOver.z + _boardOffset.z);
+        Vector3 gizmosPosition = new Vector3(_mouseOver.x + BoardOffset.x, _mouseOver.y, _mouseOver.z + BoardOffset.z);
         Gizmos.DrawCube(gizmosPosition, Vector3.one);
     }
     private void ShowAllAvailableMove()
