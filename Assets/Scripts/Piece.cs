@@ -9,7 +9,7 @@ public class Piece : MonoBehaviour
 {    
     public PieceTypeList PieceType { get; set; }
     public Vector2 Pos { get; set; }
-    public HashSet<Piece> Neighbors { get; private set; }
+    public HashSet<Piece> Neighbors { get ; private set; }
     public List<Vector2> MovesList { get; private set; }
     // add all connected neighbors and their neighbors
     public  List<Piece> AllConnectedPiece  { get; private set; }
@@ -20,25 +20,38 @@ public class Piece : MonoBehaviour
     [SerializeField] private AnimationController _animationController;
     [SerializeField] private Renderer _renderer;
 
-    [Inject]
-    private void init(Vector3 vec3, Quaternion quat, PieceTypeList type)
-    {
-        transform.localPosition = vec3;
-        // get the renderer via its child
-        _renderer = transform.GetChild(0).GetComponent<Renderer>();
-        _renderer.material = type == PieceTypeList.Red ? _redMaterial : _blueMaterial;
-        transform.localRotation = quat;
-        PieceType = type;
+    // [Inject]
+    // private void init(Vector3 vec3, Quaternion quat, PieceTypeList type)
+    // {
+    //     transform.localPosition = vec3;
+    //     // get the renderer via its child
+    //     _renderer = transform.GetChild(0).GetComponent<Renderer>();
+    //     _renderer.material = type == PieceTypeList.Red ? _redMaterial : _blueMaterial;
+    //     transform.localRotation = quat;
+    //     PieceType = type;
+    //     Neighbors = new HashSet<Piece>();
+    //     Pos = new Vector2((int)vec3.x, (int)vec3.z);
+    //     MovesList = new List<Vector2>();
+    //     AllConnectedPiece = new List<Piece>();
+    //     CapturedPositions = new HashSet<Vector2>();
+    //     NeighborOpponents = new HashSet<Piece>();
+    //     _animationController = GetComponent<AnimationController>();
+
+    // }
+    void Awake() {
         Neighbors = new HashSet<Piece>();
-        Pos = new Vector2((int)vec3.x, (int)vec3.z);
         MovesList = new List<Vector2>();
         AllConnectedPiece = new List<Piece>();
         CapturedPositions = new HashSet<Vector2>();
         NeighborOpponents = new HashSet<Piece>();
-        _animationController = GetComponent<AnimationController>();
-
     }
-
+    void Start()
+    {       
+        // get the renderer via its child
+        _renderer = transform.GetChild(0).GetComponent<Renderer>();
+        _renderer.material = PieceType == PieceTypeList.Red ? _redMaterial : _blueMaterial;
+        _animationController = GetComponent<AnimationController>();
+    }
     public void UpdateNeighborPieces(Piece[,] board)
     {
         Neighbors.Clear();
@@ -388,5 +401,5 @@ public class Piece : MonoBehaviour
         x3 = x2 + (x2 - x1);
         z3 = z2 + (z2 - z1);
     }
-    public class Factory : PlaceholderFactory<Vector3, Quaternion, PieceTypeList, Piece> { }
+    //public class Factory : PlaceholderFactory<Vector3, Quaternion, PieceTypeList, Piece> { }
 }
