@@ -33,16 +33,17 @@ public class BoardGenerator : MonoBehaviour
     //     _pieceFactory = pieceFactory;
     //     _inputController = inputController;
     // }
-    void Start()
-    {
-        SetUp();
-    }
-    public void ManualStart()
-    {
-        SetUp();
-    }
-    void SetUp() 
+    // void Start()
+    // {
+    //     SetUp();
+    // }
+    // public void ManualStart()
+    // {
+    //     SetUp();
+    // }
+    public void SetUp() 
     { 
+        Debug.Log("!!!!!SetUp");
         _inputController = GetComponent<InputController>();
         _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
         CreateBoard();
@@ -231,10 +232,10 @@ public class BoardGenerator : MonoBehaviour
         ClearBoard();
         // reset the board position
         transform.position = Vector3.zero;
-        ManualStart();
+        SetUp();
     }
 
-    private void ClearBoard()
+    public void ClearBoard()
     {
         foreach (Piece p in _pieces)
         {
