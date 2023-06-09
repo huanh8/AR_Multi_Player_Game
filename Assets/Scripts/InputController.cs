@@ -1,28 +1,41 @@
 using System;
 using UnityEngine;
 using Unity.Netcode;
+using static Constants;
 
 public class InputController : NetworkBehaviour
 {
+    public static InputController  Instance { get; private set; }
     public bool IsDraggingPiece { get; private set; }
     public bool IsDraggingEnded { get; private set; }
-
+    public Vector3 BoardOffsetClient { get; set; } = new Vector3(0, 0, 0);
+    private PieceTypeList _isHostTurn = PieceTypeList.Red;
+    private PieceTypeList _isClientTurn = PieceTypeList.Blue;
     public Camera _camera;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
         _camera = _camera == null ? GameObject.Find(Constants.CAMERA_NAME).GetComponent<Camera>() : _camera;
     }
 
     public void Update()
     {
+        // check if BoardGenerator.Instance.IsRightTurn exists 
+        if (BoardGenerator.Instance == null) return;
+        if (BoardGenerator.Instance.IsRightTurn == _isHostTurn && !IsHost) return;
+        if (BoardGenerator.Instance.IsRightTurn == _isClientTurn && IsHost) return;
 
         if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log("!!Mouse down");
-            IsDraggingPiece = true;
-            
-            Debug.Log("!!Mouse down" +IsDraggingPiece);
+            IsDraggingPiece = true;    
         }
         else if (Input.GetMouseButtonUp(0))
         {
@@ -56,7 +69,7 @@ public class InputController : NetworkBehaviour
         }
     }
 
-    public Vector3 UpdateDragPosition(LayerMask layerMask, Vector3 boardOffset)
+    public Vector3 UpdateDragPosition(LayerMask layerMask)
     {
         Vector3 position = new Vector3(1, 1, 1);
         if (_camera == null)
@@ -68,7 +81,7 @@ public class InputController : NetworkBehaviour
         RaycastHit hit;
         if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out hit, 25.0f, layerMask))
         {
-            position = hit.point + Vector3.up - boardOffset;
+            position = hit.point + Vector3.up - BoardOffsetClient;
         }
         return position;
     }
