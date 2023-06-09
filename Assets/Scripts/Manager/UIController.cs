@@ -36,4 +36,8 @@ public class UIController : MonoBehaviour
     {
         TMPtext.gameObject.SetActive(enabled);
     }
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
 }
