@@ -21,7 +21,7 @@ public class PlaceChessBoard : MonoBehaviour
     void Start()
     {
         isPlaced = false;
-        boardGenerator = boardPrefab.GetComponent<BoardGenerator>();
+        //boardGenerator = boardPrefab.GetComponent<BoardGenerator>();
         raycastManager = GetComponent<ARRaycastManager>();
     }
 
@@ -40,8 +40,11 @@ public class PlaceChessBoard : MonoBehaviour
                     Pose hitPose = hits[0].pose;
                     if (!isPlaced)
                     {
+                        Debug.Log("Placing chess board");
                         //spawnObject = Instantiate(chessBoardPrefab, hitPose.position, hitPose.rotation);
-                        boardGenerator.SetUp();
+                        spawnObject = Instantiate(boardPrefab, hitPose.position, hitPose.rotation);
+                        boardGenerator = spawnObject.GetComponent<BoardGenerator>();
+                        boardGenerator.ManualStart();
 
                         isPlaced = true;
                         confirmButton.SetActive(true);
@@ -57,7 +60,7 @@ public class PlaceChessBoard : MonoBehaviour
     {
         if (isPlaced)
         {
-            boardGenerator.ClearBoard();
+            //boardGenerator.ClearBoard();
             isPlaced = false;
             confirmButton.SetActive(false);
             planeManager.enabled = true;

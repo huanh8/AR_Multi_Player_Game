@@ -33,14 +33,14 @@ public class BoardGenerator : MonoBehaviour
     //     _pieceFactory = pieceFactory;
     //     _inputController = inputController;
     // }
-    // void Start()
-    // {
-    //     SetUp();
-    // }
-    // public void ManualStart()
-    // {
-    //     SetUp();
-    // }
+    void Start()
+    {
+        SetUp();
+    }
+    public void ManualStart()
+    {
+        SetUp();
+    }
     public void SetUp() 
     { 
         Debug.Log("!!!!!SetUp");
