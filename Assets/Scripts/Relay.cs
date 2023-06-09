@@ -12,6 +12,7 @@ using Unity.Networking.Transport.Relay;
 public class Relay : MonoBehaviour
 {   
     public static Relay Instance { get; private set; }
+    public bool IsConnected{ get; private set; }
     private void Awake() {
         Instance = this;
 
@@ -34,9 +35,29 @@ public class Relay : MonoBehaviour
     }
 
 
+    private void Update()
+    {
+        ShowNetworkMenu();
+
+    }
+
+    private void ShowNetworkMenu()
+    {
+        //check if both of the client and server are connected each other
+        if (NetworkManager.Singleton.IsServer)
+        {
+            IsConnected = NetworkManager.Singleton.ConnectedClientsList.Count >= 2;
+        }
+        else
+        {
+            IsConnected = NetworkManager.Singleton.IsConnectedClient;
+        }
+
+        NetworkMenuManagerUI.instance.ShowMenu(!IsConnected);
+    }
+
     //Summary
     //Creates a new allocation and returns the join code for that allocation.
-   [ContextMenu("Call CreateRelay")]
     public async void CreateRelay()
     {  
          try
@@ -44,6 +65,7 @@ public class Relay : MonoBehaviour
         Allocation allocation =  await RelayService.Instance.CreateAllocationAsync(1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             Debug.Log("joinCode is " + joinCode);
+            NetworkMenuManagerUI.instance.JoinCode = joinCode;
 
             RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
@@ -55,9 +77,7 @@ public class Relay : MonoBehaviour
         }
     }
 
-    public string joinCode = "";
-   [ContextMenu("Call JoinRelay")]
-    public async void JoinRelay()
+    public async void JoinRelay(string joinCode)
     {
         try
         {

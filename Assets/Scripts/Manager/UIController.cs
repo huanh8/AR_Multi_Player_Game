@@ -32,4 +32,8 @@ public class UIController : MonoBehaviour
     {
         TMPtext.text = winner + " wins!";
     }
+    public void ShowUI(bool enabled)
+    {
+        TMPtext.gameObject.SetActive(enabled);
+    }
 }

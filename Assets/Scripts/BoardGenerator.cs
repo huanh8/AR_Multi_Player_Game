@@ -259,7 +259,7 @@ public class BoardGenerator : MonoBehaviour
     private IEnumerator ResetGame()
     {
         Debug.Log("ResetGame");
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(10f);
         ClearBoard();
         // reset the board position
         transform.position = Vector3.zero;
