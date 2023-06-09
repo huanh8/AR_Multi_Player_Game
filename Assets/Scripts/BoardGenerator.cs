@@ -252,8 +252,8 @@ public class BoardGenerator : MonoBehaviour
     {
         Debug.Log("Game Over");
         IsRightTurn = PieceTypeList.None;
-        // after 5 sec reset the game
-        StartCoroutine(ResetGame());
+        // after 10 sec reset the game
+        //StartCoroutine(ResetGame());
     }
 
     private IEnumerator ResetGame()
