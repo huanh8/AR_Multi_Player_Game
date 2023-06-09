@@ -832,11 +832,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: 
+  cloudProjectId: 02a63e9a-7cd7-4442-a450-2503e781ac51
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: OPChecker
+  organizationId: ewenhuang
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 
