@@ -10,6 +10,7 @@ public class BoardGenerator : MonoBehaviour
 {
     public static BoardGenerator Instance { get; private set; }
     [SerializeField] Piece[,] _pieces;   // 2D array of pieces
+    private Piece[,] _defaultPieces;   // 2D array of pieces
     [SerializeField] LayerMask _layerMask;
     [SerializeField] GameObject _boardCube;        // board cube object
     [SerializeField] float _offSite = 0.6f;        // offset for pieces
@@ -54,14 +55,12 @@ public class BoardGenerator : MonoBehaviour
     {
         SetUp();
     }
-    public void ManualStart()
-    {
-        SetUp();
-    }
+
     void SetUp()
     {
         _inputController = GetComponent<InputController>();
         _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
+        _defaultPieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
         CreateBoard();
         //check if the _layerMask is set, if not set it to the default layer
         _layerMask = _layerMask == 0 ? LayerMask.GetMask(Constants.BOARD_NAME) : _layerMask;
@@ -183,7 +182,7 @@ public class BoardGenerator : MonoBehaviour
         CheckVictory();
     }
 
-    private void CapturedPiece(int x, int z )
+    private void CapturedPiece(int x, int z)
     {
         Vector2 capPosition = new Vector2(x, z);
         // check if CapturedPositions of any piece in the board contains the position
@@ -248,6 +247,7 @@ public class BoardGenerator : MonoBehaviour
         GameOver();
     }
 
+    [ContextMenu("Game Over")]
     private void GameOver()
     {
         Debug.Log("Game Over");
@@ -260,10 +260,34 @@ public class BoardGenerator : MonoBehaviour
     {
         Debug.Log("ResetGame");
         yield return new WaitForSeconds(5f);
-        ClearBoard();
-        // reset the board position
-        transform.position = Vector3.zero;
-        ManualStart();
+        
+        // Reset _pieces to default positions
+        for (int i = 0; i < Constants.BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++)
+            {
+                _pieces[i, j] = _defaultPieces[i, j];
+            }
+        }
+
+        // Reset each piece's position and type
+        for (int i = 0; i < Constants.BOARD_SIZE; i++)
+        {
+            for (int j = 0; j < Constants.BOARD_SIZE; j++)
+            {
+                if (_pieces[i, j] != null)
+                {
+                    _pieces[i, j].PieceType = _pieces[i, j].DefaultPieceType;
+                    _pieces[i, j].Pos = new Vector2(i, j);
+                    MovePiece(_pieces[i, j], i, j, _pieces[i, j].DefaultPieceType);
+                    _pieces[i, j].ChangeColor();
+                }
+            }
+        }
+        //reset the turn
+        IsRightTurn = PieceTypeList.Red;
+        UIController.instance.SetTurns(IsRightTurn);
+        SetUpAllPieces();
     }
 
     private void ClearBoard()
@@ -395,6 +419,9 @@ public class BoardGenerator : MonoBehaviour
         _pieces[i, j].PieceType = pieceType;
         _pieces[i, j].Pos = new Vector2((int)i, (int)j);
         SetNameAndType(i, j, pieceType);
+        // store default position type and Pos
+        _pieces[i, j].DefaultPieceType = pieceType;
+        _defaultPieces[i, j] = _pieces[i, j];
     }
 
 
@@ -409,14 +436,14 @@ public class BoardGenerator : MonoBehaviour
         _pieces[i, j].PieceType = pieceType;
     }
 
-    private void MovePiece(Piece p, int x, int z, PieceTypeList pieceType = PieceTypeList.None) 
+    private void MovePiece(Piece p, int x, int z, PieceTypeList pieceType = PieceTypeList.None)
     {
         if (pieceType != PieceTypeList.None)
         {
             StartCoroutine(AnimateMovePiece(p, x, z));
         }
-        else 
-        { 
+        else
+        {
             p.transform.position = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + BoardOffset;
         }
         SetNameAndType(x, z, p.PieceType);
@@ -432,12 +459,12 @@ public class BoardGenerator : MonoBehaviour
         Vector3 targetPosition = (Vector3.right * x) + (Vector3.forward * z) + (Vector3.up * _offSite) + BoardOffset;
         Vector3 upPosition = targetPosition + Vector3.up * 2;
         while (p.transform.position != upPosition)
-        {   
+        {
             p.transform.position = Vector3.MoveTowards(p.transform.position, upPosition, Time.deltaTime * 5f);
             yield return null;
         }
         while (p.transform.position != targetPosition)
-        {   
+        {
             p.transform.position = Vector3.MoveTowards(p.transform.position, targetPosition, Time.deltaTime * 5f);
             yield return null;
         }
