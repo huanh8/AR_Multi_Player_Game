@@ -53,7 +53,10 @@ public class Relay : MonoBehaviour
             IsConnected = NetworkManager.Singleton.IsConnectedClient;
         }
 
-        NetworkMenuManagerUI.instance.ShowMenu(!IsConnected);
+        if (NetworkMenuManagerUI.instance != null)
+        {
+            NetworkMenuManagerUI.instance.ShowMenu(!IsConnected);
+        }
     }
 
     //Summary
