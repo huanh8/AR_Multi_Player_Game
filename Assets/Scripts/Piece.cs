@@ -6,39 +6,23 @@ using Zenject;
 using static Constants;
 
 public class Piece : MonoBehaviour
-{    
+{
     public PieceTypeList PieceType { get; set; }
     public Vector2 Pos { get; set; }
-    public HashSet<Piece> Neighbors { get ; private set; }
+    public HashSet<Piece> Neighbors { get; private set; }
     public List<Vector2> MovesList { get; private set; }
     // add all connected neighbors and their neighbors
-    public  List<Piece> AllConnectedPiece  { get; private set; }
-    public  HashSet<Vector2> CapturedPositions { get; private set; }
-    public  HashSet<Piece> NeighborOpponents { get; private set; }
+    public List<Piece> AllConnectedPiece { get; private set; }
+    public HashSet<Vector2> CapturedPositions { get;  set; }
+    public HashSet<Piece> NeighborOpponents { get;  set; }
     [SerializeField] private Material _blueMaterial;
     [SerializeField] private Material _redMaterial;
     [SerializeField] private AnimationController _animationController;
     [SerializeField] private Renderer _renderer;
+    public PieceTypeList DefaultPieceType { get; set; } = PieceTypeList.None;
 
-    // [Inject]
-    // private void init(Vector3 vec3, Quaternion quat, PieceTypeList type)
-    // {
-    //     transform.localPosition = vec3;
-    //     // get the renderer via its child
-    //     _renderer = transform.GetChild(0).GetComponent<Renderer>();
-    //     _renderer.material = type == PieceTypeList.Red ? _redMaterial : _blueMaterial;
-    //     transform.localRotation = quat;
-    //     PieceType = type;
-    //     Neighbors = new HashSet<Piece>();
-    //     Pos = new Vector2((int)vec3.x, (int)vec3.z);
-    //     MovesList = new List<Vector2>();
-    //     AllConnectedPiece = new List<Piece>();
-    //     CapturedPositions = new HashSet<Vector2>();
-    //     NeighborOpponents = new HashSet<Piece>();
-    //     _animationController = GetComponent<AnimationController>();
-
-    // }
-    void Awake() {
+    void Awake()
+    {
         Neighbors = new HashSet<Piece>();
         MovesList = new List<Vector2>();
         AllConnectedPiece = new List<Piece>();
@@ -46,7 +30,7 @@ public class Piece : MonoBehaviour
         NeighborOpponents = new HashSet<Piece>();
     }
     void Start()
-    {       
+    {
         // get the renderer via its child
         _renderer = transform.GetChild(0).GetComponent<Renderer>();
         _renderer.material = PieceType == PieceTypeList.Red ? _redMaterial : _blueMaterial;
@@ -55,7 +39,7 @@ public class Piece : MonoBehaviour
     public void UpdateNeighborPieces(Piece[,] board)
     {
         Neighbors.Clear();
-        FindNeighbor(board,PieceType);
+        FindNeighbor(board, PieceType);
         UpdateOpponentsNeighborPieces(board);
         UpdateOpponentCapturedPositions(board);
     }
@@ -63,12 +47,12 @@ public class Piece : MonoBehaviour
     private void UpdateOpponentCapturedPositions(Piece[,] board)
     {
         if (NeighborOpponents.Count > 0)
-        { 
+        {
             foreach (Piece opponent in NeighborOpponents)
             {
                 int x, z;
                 FindCapturePos(opponent.Pos, Pos, out x, out z);
-                if (IsNotOutBoard(x,z))
+                if (IsNotOutBoard(x, z))
                 {
                     if (board[x, z] == null)
                     {
@@ -85,8 +69,8 @@ public class Piece : MonoBehaviour
         PieceTypeList opponentType = PieceType == PieceTypeList.Red ? PieceTypeList.Blue : PieceTypeList.Red;
         FindNeighbor(board, opponentType, NeighborOpponents);
     }
-    
-    private void FindNeighbor(Piece[,] board, PieceTypeList pieceType, HashSet<Piece> neighbors = null )
+
+    private void FindNeighbor(Piece[,] board, PieceTypeList pieceType, HashSet<Piece> neighbors = null)
     {
         int x = (int)Pos.x;
         int z = (int)Pos.y;
@@ -94,12 +78,13 @@ public class Piece : MonoBehaviour
         {
             neighbors = Neighbors;
         }
-        
+
         for (int i = 0; i < Constants.BOARD_SIZE; i++)
         {
             for (int j = 0; j < Constants.BOARD_SIZE; j++)
             {
-                if (board[i, j] != null){
+                if (board[i, j] != null)
+                {
                     // check if it is a neighbor except itself
                     if (Mathf.Abs(i - x) <= 1 && Mathf.Abs(j - z) <= 1 && (i != x || j != z))
                     {
@@ -114,7 +99,7 @@ public class Piece : MonoBehaviour
     }
 
     private bool CheckBackHome(int x2, int z2)
-    {   
+    {
         bool home = false;
         if (PieceType == Constants.PieceTypeList.Red)
         {
@@ -137,7 +122,7 @@ public class Piece : MonoBehaviour
         {
             return;
         }
-        
+
         List<Piece> allConnectedNeighbors = new List<Piece>();
 
         // add neighbors
@@ -151,15 +136,15 @@ public class Piece : MonoBehaviour
         // check if all pieces in AllConnectedPiece are connected to each other
         // if they are not connected, find potential connections
         if (!IsAllPiecesConnected(AllConnectedPiece))
-        {   
+        {
             MovesList = FindPotentialConnections(AllConnectedPiece, board);
         }
         else
-        { 
+        {
             MovesList = AddMovesList(board);
         }
 
-        if (MovesList.Count > 0) 
+        if (MovesList.Count > 0)
         {
             RemoveItselfFormMovesList();
             RemoveHomesFromMovesList();
@@ -272,7 +257,7 @@ public class Piece : MonoBehaviour
             // find all NeighborOpponents 
             if (n.NeighborOpponents.Count > 0)
             {
-               // Debug.Log($"the opponent's neighbors of {n.Pos} is {n.NeighborOpponents.Count}");             
+                // Debug.Log($"the opponent's neighbors of {n.Pos} is {n.NeighborOpponents.Count}");             
                 foreach (Piece op in n.NeighborOpponents)
                 {
                     int x1, z1;
@@ -343,10 +328,10 @@ public class Piece : MonoBehaviour
                     visited.Add(neighbor);
                     queue.Enqueue(neighbor);
 
-                      if (neighbor != this) 
-                      {
+                    if (neighbor != this)
+                    {
                         allConnectedNeighbors.Add(neighbor);
-                      }
+                    }
                 }
             }
         }
@@ -378,7 +363,7 @@ public class Piece : MonoBehaviour
     }
 
     public void ChangeColor()
-    { 
+    {
         _renderer.material = PieceType == PieceTypeList.Red ? _redMaterial : _blueMaterial;
     }
 
