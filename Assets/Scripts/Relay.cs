@@ -10,10 +10,11 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 
 public class Relay : MonoBehaviour
-{   
+{
     public static Relay Instance { get; private set; }
-    public bool IsConnected{ get; private set; }
-    private void Awake() {
+    public bool IsConnected { get; private set; }
+    private void Awake()
+    {
         Instance = this;
 
         if (Instance != null && Instance != this)
@@ -27,8 +28,9 @@ public class Relay : MonoBehaviour
     }
     async void Start()
     {
-       await UnityServices.InitializeAsync();
-        AuthenticationService.Instance.SignedIn += () => {
+        await UnityServices.InitializeAsync();
+        AuthenticationService.Instance.SignedIn += () =>
+        {
             Debug.LogWarning("Signed in " + AuthenticationService.Instance.PlayerId);
         };
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
@@ -38,7 +40,6 @@ public class Relay : MonoBehaviour
     private void Update()
     {
         ShowNetworkMenu();
-
     }
 
     private void ShowNetworkMenu()
@@ -62,10 +63,11 @@ public class Relay : MonoBehaviour
     //Summary
     //Creates a new allocation and returns the join code for that allocation.
     public async void CreateRelay()
-    {  
-         try
+    {
+        NetworkMenuManagerUI.instance.JoinCode = "Creating...";
+        try
         {
-        Allocation allocation =  await RelayService.Instance.CreateAllocationAsync(1);
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             Debug.Log("joinCode is " + joinCode);
             NetworkMenuManagerUI.instance.JoinCode = joinCode;
@@ -82,12 +84,13 @@ public class Relay : MonoBehaviour
 
     public async void JoinRelay(string joinCode)
     {
+        NetworkMenuManagerUI.instance.JoinCode = "Joining...";
         try
         {
             Debug.Log("JoinRelay with code " + joinCode);
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
-            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");    
+            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
             NetworkManager.Singleton.StartClient();
         }
@@ -95,5 +98,6 @@ public class Relay : MonoBehaviour
         {
             Debug.LogError(e);
         }
+        NetworkMenuManagerUI.instance.JoinCode = "";
     }
 }

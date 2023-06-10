@@ -13,8 +13,8 @@ public class Piece : MonoBehaviour
     public List<Vector2> MovesList { get; private set; }
     // add all connected neighbors and their neighbors
     public List<Piece> AllConnectedPiece { get; private set; }
-    public HashSet<Vector2> CapturedPositions { get; private set; }
-    public HashSet<Piece> NeighborOpponents { get; private set; }
+    public HashSet<Vector2> CapturedPositions { get;  set; }
+    public HashSet<Piece> NeighborOpponents { get;  set; }
     [SerializeField] private Material _blueMaterial;
     [SerializeField] private Material _redMaterial;
     [SerializeField] private AnimationController _animationController;

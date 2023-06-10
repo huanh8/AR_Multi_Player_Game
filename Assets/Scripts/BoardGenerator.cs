@@ -55,10 +55,7 @@ public class BoardGenerator : MonoBehaviour
     {
         SetUp();
     }
-    public void ManualStart()
-    {
 
-    }
     void SetUp()
     {
         _inputController = GetComponent<InputController>();
@@ -255,7 +252,7 @@ public class BoardGenerator : MonoBehaviour
     {
         Debug.Log("Game Over");
         IsRightTurn = PieceTypeList.None;
-        // after 10 sec reset the game
+        // after 5 sec reset the game
         StartCoroutine(ResetGame());
     }
 
@@ -263,7 +260,7 @@ public class BoardGenerator : MonoBehaviour
     {
         Debug.Log("ResetGame");
         yield return new WaitForSeconds(5f);
-
+        
         // Reset _pieces to default positions
         for (int i = 0; i < Constants.BOARD_SIZE; i++)
         {
@@ -291,11 +288,6 @@ public class BoardGenerator : MonoBehaviour
         IsRightTurn = PieceTypeList.Red;
         UIController.instance.SetTurns(IsRightTurn);
         SetUpAllPieces();
-        //ClearBoard();
-        // reset the board position
-        //transform.position = Vector3.zero;
-        // ManualStart();
-
     }
 
     private void ClearBoard()

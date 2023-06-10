@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using static Constants;
+using Unity.Netcode;
 
 // make a singleton
 public class UIController : MonoBehaviour
@@ -28,7 +29,7 @@ public class UIController : MonoBehaviour
     {
         TMPtext.text = "Turns: " + turns;
     }
-    public void SetWinner (PieceTypeList winner)
+    public void SetWinner(PieceTypeList winner)
     {
         TMPtext.text = winner + " wins!";
     }
@@ -39,5 +40,11 @@ public class UIController : MonoBehaviour
     public void ExitGame()
     {
         Application.Quit();
+    }
+    public void Disconnect()
+    {
+        //DisconnectClient to disconnect the client from the server
+        NetworkManager.Singleton.Shutdown();
+        NetworkMenuManagerUI.instance.JoinCode = "";
     }
 }
