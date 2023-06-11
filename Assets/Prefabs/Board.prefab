@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8010027489681730814}
   - component: {fileID: -1068957557588263385}
   - component: {fileID: 389944526577820492}
+  - component: {fileID: -13264710686999081}
   m_Layer: 6
   m_Name: Board
   m_TagString: Untagged
@@ -53,10 +54,11 @@ MonoBehaviour:
   _boardCube: {fileID: 8786761727277323285, guid: 4ed69a2b3164af44f9bed86e8f85a2a4,
     type: 3}
   _offSite: 0.6
-  _boardOffset: {x: 0.5, y: 0, z: 0.5}
+  BoardOffset: {x: 0.5, y: 0, z: 0.5}
   _boxColliderSize: 6
   _boxColliderCenter: 2.5
-  _isRightTurn: 0
+  _selectedPiece: {fileID: 0}
+  IsRightTurn: 0
   _piecePrefab: {fileID: 6757012476710171418, guid: b5676dfdc27ac2e48941ffed286bc889,
     type: 3}
 --- !u!65 &8010027489681730814
@@ -101,3 +103,21 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 0
+--- !u!114 &-13264710686999081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462470342480813533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cd62ecf081689b45a35e0207a23beed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 0}
+  _cameraOffsetClient: {x: 6, y: 10, z: 7}
+  _cameraOffsetRotatedClient: {x: 65, y: 225, z: 0}
+  _cameraOffsetHost: {x: 0, y: 10, z: -1}
+  _cameraOffsetRotatedHost: {x: 65, y: 45, z: 0}
+  _clientOffset: -1

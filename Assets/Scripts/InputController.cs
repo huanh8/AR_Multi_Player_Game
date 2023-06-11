@@ -33,9 +33,14 @@ public class InputController : NetworkBehaviour
         if (BoardGenerator.Instance.IsRightTurn == _isHostTurn && !IsHost) return;
         if (BoardGenerator.Instance.IsRightTurn == _isClientTurn && IsHost) return;
 
+        MouseInput();
+    }
+
+    private void MouseInput()
+    {
         if (Input.GetMouseButtonDown(0))
         {
-            IsDraggingPiece = true;    
+            IsDraggingPiece = true;
         }
         else if (Input.GetMouseButtonUp(0))
         {
