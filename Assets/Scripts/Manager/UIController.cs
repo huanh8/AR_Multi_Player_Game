@@ -45,7 +45,5 @@ public class UIController : MonoBehaviour
     {
         //DisconnectClient to disconnect the client from the server
         NetworkManager.Singleton.Shutdown();
-        // NetworkMenuManager.Instance.JoinCode = "";
-        // BoardGenerator.Instance.GameOver();
     }
 }

@@ -32,7 +32,6 @@ public class BoardGenerator : MonoBehaviour
     public GameObject _piecePrefab;
     // create a public event and pass x1 x2 z1 z2
     public static event Action<int, int, int, int, Piece> OnPieceMoveEvent;
-    public GameState State = GameState.HasNotStarted;
 
     // [Inject]
     // private void Init(Piece.Factory pieceFactory, InputController inputController)

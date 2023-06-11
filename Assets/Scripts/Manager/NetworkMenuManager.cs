@@ -7,7 +7,6 @@ using TMPro;
 
 public class NetworkMenuManager : MonoBehaviour
 {
-
     public static NetworkMenuManager Instance;
     [SerializeField] private Button _hostBtn;
     [SerializeField] private Button _clientBtn;
@@ -32,12 +31,10 @@ public class NetworkMenuManager : MonoBehaviour
         _joinCodeInput.text = "";
         NetworkManager.Singleton?.Shutdown();
         BoardGenerator.Instance?.GameOver();
-        Debug.Log("!OnEnable");
     }
     private void OnDisable() { 
         //rotate the board
         BoardNetwork.Instance?.SetBoardDirection();
-        Debug.Log("!Disabled");
         StopAllCoroutines();
     }
 

@@ -45,14 +45,15 @@ public class Relay : MonoBehaviour
 
     private void ShowMenu()
     {
-        if (NetworkMenuManager.Instance != null)
-        {
-            NetworkMenuManager.Instance.ShowMenu(!IsConnected);
-        }
+        NetworkMenuManager.Instance?.ShowMenu(!IsConnected);
     }
 
     private void CheckConnection()
     {
+        if (NetworkManager.Singleton == null)
+        {
+            return;
+        }
         //check if both of the client and server are connected each other
         if (NetworkManager.Singleton.IsServer)
         {
@@ -102,6 +103,5 @@ public class Relay : MonoBehaviour
         {
             Debug.LogError(e);
         }
-        NetworkMenuManager.Instance.JoinCode = "";
     }
 }

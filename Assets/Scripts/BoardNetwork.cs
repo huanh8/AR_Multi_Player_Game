@@ -15,7 +15,7 @@ public class BoardNetwork : NetworkBehaviour
     [SerializeField] private Vector3 _cameraOffsetHost = new Vector3(0, 10, -1);
     [SerializeField] private Vector3 _cameraOffsetRotatedHost = new Vector3(65, 45, 0);
     [SerializeField] private int _clientOffset = -1;
-    [SerializeField] private BoardGenerator _boardGenerator;
+  
 
     private void Awake() {
         if (Instance == null)
@@ -31,12 +31,11 @@ public class BoardNetwork : NetworkBehaviour
     void Start()
     {
         _camera = _camera == null ? GameObject.Find(Constants.CAMERA_NAME).GetComponent<Camera>() : _camera;
-        _boardGenerator = GetComponent<BoardGenerator>();
     }
 
     public void SetBoardDirection()
     {
-        if (!NetworkManager.Singleton.IsServer)
+        if (NetworkManager.Singleton != null && !NetworkManager.Singleton.IsServer)
         {
             _camera.transform.position = _cameraOffsetClient;
             _camera.transform.eulerAngles = _cameraOffsetRotatedClient;
