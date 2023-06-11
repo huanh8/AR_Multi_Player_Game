@@ -40,15 +40,15 @@ public class PlaceChessBoard : MonoBehaviour
                     Pose hitPose = hits[0].pose;
                     if (!isPlaced)
                     {
-                        Debug.Log("Placing chess board");
-                        //spawnObject = Instantiate(chessBoardPrefab, hitPose.position, hitPose.rotation);
-                        spawnObject = Instantiate(boardPrefab, hitPose.position, hitPose.rotation);
-                        boardGenerator = spawnObject.GetComponent<BoardGenerator>();
-                        boardGenerator.ManualStart();
+                        // Debug.Log("Placing chess board");
+                        // //spawnObject = Instantiate(chessBoardPrefab, hitPose.position, hitPose.rotation);
+                        // spawnObject = Instantiate(boardPrefab, hitPose.position, hitPose.rotation);
+                        // boardGenerator = spawnObject.GetComponent<BoardGenerator>();
+                        // boardGenerator.SetUp();
 
-                        isPlaced = true;
-                        confirmButton.SetActive(true);
-                        planeManager.enabled = false;
+                        // isPlaced = true;
+                        // confirmButton.SetActive(true);
+                        // planeManager.enabled = false;
                     }
                     
                 }

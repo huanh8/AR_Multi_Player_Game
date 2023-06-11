@@ -32,6 +32,8 @@ public class BoardGenerator : MonoBehaviour
     public GameObject _piecePrefab;
     // create a public event and pass x1 x2 z1 z2
     public static event Action<int, int, int, int, Piece> OnPieceMoveEvent;
+    // get UI manager to set the turns/display game status
+    private UIController _uiController = UIController.instance;
 
     // [Inject]
     // private void Init(Piece.Factory pieceFactory, InputController inputController)
@@ -56,7 +58,7 @@ public class BoardGenerator : MonoBehaviour
         SetUp();
     }
 
-    void SetUp()
+    public void SetUp()
     {
         _inputController = GetComponent<InputController>();
         _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
@@ -67,7 +69,7 @@ public class BoardGenerator : MonoBehaviour
         //set box collider size
         SetSizeBoxCollider();
         IsRightTurn = PieceTypeList.Red;
-        UIController.instance.SetTurns(IsRightTurn);
+        _uiController?.SetTurns(IsRightTurn);
         SetUpAllPieces();
     }
     private void SetSizeBoxCollider()
