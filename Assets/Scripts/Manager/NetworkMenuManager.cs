@@ -5,9 +5,9 @@ using UnityEngine.UI;
 using Unity.Netcode;
 using TMPro;
 
-public class NetworkMenuManagerUI : MonoBehaviour{
-
-    public static NetworkMenuManagerUI instance;
+public class NetworkMenuManager : MonoBehaviour
+{
+    public static NetworkMenuManager Instance;
     [SerializeField] private Button _hostBtn;
     [SerializeField] private Button _clientBtn;
     [SerializeField] private TextMeshProUGUI _joinCode;
@@ -16,32 +16,47 @@ public class NetworkMenuManagerUI : MonoBehaviour{
     public string JoinCodeInput;
     private void Awake()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
         }
         else
         {
             Destroy(gameObject);
         }
     }
+    private void OnEnable() {
+        JoinCode = "";
+        JoinCodeInput = "";
+        _joinCodeInput.text = "";
+        NetworkManager.Singleton?.Shutdown();
+        BoardGenerator.Instance?.GameOver();
+    }
+    private void OnDisable() { 
+        //rotate the board
+        BoardNetwork.Instance?.SetBoardDirection();
+        StopAllCoroutines();
+    }
+
     void Start()
     {
-        _hostBtn.onClick.AddListener(()=>{
+        _hostBtn.onClick.AddListener(() =>
+        {
             Relay.Instance.CreateRelay();
         });
-        _clientBtn.onClick.AddListener(()=>{
+        _clientBtn.onClick.AddListener(() =>
+        {
             Relay.Instance.JoinRelay(JoinCodeInput);
         });
     }
-    void Update() {
+    void Update()
+    {
         _joinCode.text = JoinCode;
         JoinCodeInput = _joinCodeInput.text;
     }
-    public void ShowMenu(bool enabled) 
-    { 
-        this.gameObject.SetActive(enabled);
+    public void ShowMenu(bool enabled)
+    {
+        gameObject.SetActive(enabled);
         UIController.instance.ShowUI(!enabled);
     }
-
 }

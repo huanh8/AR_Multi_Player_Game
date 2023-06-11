@@ -32,8 +32,6 @@ public class BoardGenerator : MonoBehaviour
     public GameObject _piecePrefab;
     // create a public event and pass x1 x2 z1 z2
     public static event Action<int, int, int, int, Piece> OnPieceMoveEvent;
-    // get UI manager to set the turns/display game status
-    private UIController _uiController = UIController.instance;
 
     // [Inject]
     // private void Init(Piece.Factory pieceFactory, InputController inputController)
@@ -58,7 +56,7 @@ public class BoardGenerator : MonoBehaviour
         SetUp();
     }
 
-    public void SetUp()
+    void SetUp()
     {
         _inputController = GetComponent<InputController>();
         _pieces = new Piece[Constants.BOARD_SIZE, Constants.BOARD_SIZE]; // 2D array of pieces
@@ -69,7 +67,7 @@ public class BoardGenerator : MonoBehaviour
         //set box collider size
         SetSizeBoxCollider();
         IsRightTurn = PieceTypeList.Red;
-        _uiController?.SetTurns(IsRightTurn);
+        UIController.instance?.SetTurns(IsRightTurn);
         SetUpAllPieces();
     }
     private void SetSizeBoxCollider()
@@ -177,7 +175,7 @@ public class BoardGenerator : MonoBehaviour
         //move the piece
         _pieces[x2, z2] = _pieces[x1, z1];
         _pieces[x1, z1] = null;
-
+        // State = GameState.HasMoved;
         MovePiece(_selectedPiece, x2, z2, pieceType);
         SetUpAllPieces();
         EndTurn();
@@ -250,7 +248,7 @@ public class BoardGenerator : MonoBehaviour
     }
 
     [ContextMenu("Game Over")]
-    private void GameOver()
+    public void GameOver()
     {
         Debug.Log("Game Over");
         IsRightTurn = PieceTypeList.None;
