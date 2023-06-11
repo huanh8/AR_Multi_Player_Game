@@ -32,6 +32,7 @@ public class BoardGenerator : MonoBehaviour
     public GameObject _piecePrefab;
     // create a public event and pass x1 x2 z1 z2
     public static event Action<int, int, int, int, Piece> OnPieceMoveEvent;
+    public GameState State = GameState.HasNotStarted;
 
     // [Inject]
     // private void Init(Piece.Factory pieceFactory, InputController inputController)
@@ -67,7 +68,7 @@ public class BoardGenerator : MonoBehaviour
         //set box collider size
         SetSizeBoxCollider();
         IsRightTurn = PieceTypeList.Red;
-        UIController.instance.SetTurns(IsRightTurn);
+        UIController.instance?.SetTurns(IsRightTurn);
         SetUpAllPieces();
     }
     private void SetSizeBoxCollider()
@@ -175,7 +176,7 @@ public class BoardGenerator : MonoBehaviour
         //move the piece
         _pieces[x2, z2] = _pieces[x1, z1];
         _pieces[x1, z1] = null;
-
+        // State = GameState.HasMoved;
         MovePiece(_selectedPiece, x2, z2, pieceType);
         SetUpAllPieces();
         EndTurn();
@@ -248,7 +249,7 @@ public class BoardGenerator : MonoBehaviour
     }
 
     [ContextMenu("Game Over")]
-    private void GameOver()
+    public void GameOver()
     {
         Debug.Log("Game Over");
         IsRightTurn = PieceTypeList.None;

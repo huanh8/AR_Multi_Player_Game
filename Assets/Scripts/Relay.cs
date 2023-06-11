@@ -39,10 +39,19 @@ public class Relay : MonoBehaviour
 
     private void Update()
     {
-        ShowNetworkMenu();
+        CheckConnection();
+        ShowMenu();
     }
 
-    private void ShowNetworkMenu()
+    private void ShowMenu()
+    {
+        if (NetworkMenuManager.Instance != null)
+        {
+            NetworkMenuManager.Instance.ShowMenu(!IsConnected);
+        }
+    }
+
+    private void CheckConnection()
     {
         //check if both of the client and server are connected each other
         if (NetworkManager.Singleton.IsServer)
@@ -53,24 +62,19 @@ public class Relay : MonoBehaviour
         {
             IsConnected = NetworkManager.Singleton.IsConnectedClient;
         }
-
-        if (NetworkMenuManagerUI.instance != null)
-        {
-            NetworkMenuManagerUI.instance.ShowMenu(!IsConnected);
-        }
     }
 
     //Summary
     //Creates a new allocation and returns the join code for that allocation.
     public async void CreateRelay()
     {
-        NetworkMenuManagerUI.instance.JoinCode = "Creating...";
+        NetworkMenuManager.Instance.JoinCode = "Creating...";
         try
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             Debug.Log("joinCode is " + joinCode);
-            NetworkMenuManagerUI.instance.JoinCode = joinCode;
+            NetworkMenuManager.Instance.JoinCode = joinCode;
 
             RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
@@ -84,7 +88,7 @@ public class Relay : MonoBehaviour
 
     public async void JoinRelay(string joinCode)
     {
-        NetworkMenuManagerUI.instance.JoinCode = "Joining...";
+        NetworkMenuManager.Instance.JoinCode = "Joining...";
         try
         {
             Debug.Log("JoinRelay with code " + joinCode);
@@ -98,6 +102,6 @@ public class Relay : MonoBehaviour
         {
             Debug.LogError(e);
         }
-        NetworkMenuManagerUI.instance.JoinCode = "";
+        NetworkMenuManager.Instance.JoinCode = "";
     }
 }

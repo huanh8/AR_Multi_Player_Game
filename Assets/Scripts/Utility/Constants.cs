@@ -7,4 +7,9 @@ public static class Constants
     public const string RED_NAME = "RedPiece";
     public const string BLUE_NAME = "BluePiece";
     public enum PieceTypeList { Red, Blue, None };
+    public enum GameState
+    {
+        HasMoved,
+        HasNotStarted
+    }
 }
