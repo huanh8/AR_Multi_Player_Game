@@ -41,10 +41,18 @@ public class InputController : NetworkBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             IsDraggingPiece = true;
+            Debug.Log("Get Mouse");
         }
         else if (Input.GetMouseButtonUp(0))
         {
             IsDraggingEnded = true;
+        }
+
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            IsDraggingPiece = true;
+            Debug.Log("Get Touch");
         }
     }
 
