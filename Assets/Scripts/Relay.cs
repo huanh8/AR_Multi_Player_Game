@@ -102,6 +102,7 @@ public class Relay : MonoBehaviour
         catch (System.Exception e)
         {
             Debug.LogError(e);
+            NetworkMenuManager.Instance.JoinCode = "Error";
         }
     }
 }

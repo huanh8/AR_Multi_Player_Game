@@ -50,6 +50,7 @@ public class PlayerNetwork : NetworkBehaviour
         // find layer mask Board on the scene
         //_camera = _camera == null ? GameObject.Find(Constants.CAMERA_NAME).GetComponent<Camera>() : _camera;
         _camera = GameObject.Find("AR Camera").GetComponent<Camera>();
+        Debug.Log("!!Camera: " + _camera.name);
     }
 
     private void Update()
