@@ -13,6 +13,9 @@ public class InputController : NetworkBehaviour
     private PieceTypeList _isClientTurn = PieceTypeList.Blue;
     public Camera _camera;
 
+    // test purpose
+    public LineRenderer lineRenderer;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -42,10 +45,12 @@ public class InputController : NetworkBehaviour
         {
             IsDraggingPiece = true;
             Debug.Log("Get Mouse");
+            lineRenderer.enabled = true;
         }
         else if (Input.GetMouseButtonUp(0))
         {
             IsDraggingEnded = true;
+            lineRenderer.enabled = false;
         }
 
         if (Input.touchCount > 0)
@@ -75,6 +80,9 @@ public class InputController : NetworkBehaviour
         {
             //cast it as int to get the whole number
             mouseOver = new Vector3((int)hit.point.x, (int)hit.point.y + offSite, (int)hit.point.z);
+            lineRenderer.SetPosition(0, mouseOver);
+            lineRenderer.SetPosition(1, mouseOver + Vector3.up * 10);
+            Debug.Log("MouseOver: " + mouseOver);
         }
         else
         {
