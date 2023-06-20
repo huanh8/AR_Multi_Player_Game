@@ -36,7 +36,8 @@ public class InputController : NetworkBehaviour
         if (BoardGenerator.Instance.IsRightTurn == _isHostTurn && !IsHost) return;
         if (BoardGenerator.Instance.IsRightTurn == _isClientTurn && IsHost) return;
 
-        MouseInput();
+        //MouseInput();
+        TouchInput();
     }
 
     private void MouseInput()
@@ -52,12 +53,24 @@ public class InputController : NetworkBehaviour
             IsDraggingEnded = true;
             lineRenderer.enabled = false;
         }
+    }
 
+    private void TouchInput()
+    {
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
-            IsDraggingPiece = true;
-            Debug.Log("Get Touch");
+            if (touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved)
+            {
+                IsDraggingPiece = true;
+                Debug.Log("Get Touch");
+                lineRenderer.enabled = true;
+            }
+            else if (touch.phase == TouchPhase.Ended)
+            {
+                IsDraggingEnded = true;
+                lineRenderer.enabled = false;
+            }
         }
     }
 
