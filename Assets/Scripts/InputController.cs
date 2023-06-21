@@ -46,14 +46,16 @@ public class InputController : NetworkBehaviour
         {
             IsDraggingPiece = true;
             Debug.Log("Get Mouse");
-            lineRenderer.enabled = true;
+            // lineRenderer.enabled = true;
         }
         else if (Input.GetMouseButtonUp(0))
         {
             IsDraggingEnded = true;
-            lineRenderer.enabled = false;
+            // lineRenderer.enabled = false;
         }
     }
+
+    public bool hasAPiece = false;
 
     private void TouchInput()
     {
@@ -61,15 +63,20 @@ public class InputController : NetworkBehaviour
         {
             Touch touch = Input.GetTouch(0);
             if (touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved)
-            {
+            {                
                 IsDraggingPiece = true;
                 Debug.Log("Get Touch");
-                lineRenderer.enabled = true;
             }
             else if (touch.phase == TouchPhase.Ended)
             {
                 IsDraggingEnded = true;
-                lineRenderer.enabled = false;
+                IsDraggingPiece = false;
+                hasAPiece = false;
+            }
+            else
+            {
+                IsDraggingPiece = false;
+                IsDraggingEnded = false;
             }
         }
     }
@@ -82,30 +89,31 @@ public class InputController : NetworkBehaviour
     public void UpdateMouseOver(float offSite, LayerMask layerMask, out Vector3 mouseOver)
     {
         mouseOver = new Vector3(-1, -1, -1);
-        if (_camera == null)
-        {
-            Debug.Log("No camera found");
-            return;
-        }
+      
+    
+            if (_camera == null)
+            {
+                Debug.Log("No camera found");
+                return;
+            }
 
-        RaycastHit hit;
-        if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out hit, 25.0f, layerMask))
-        {
-            //cast it as int to get the whole number
-            mouseOver = new Vector3((int)hit.point.x, (int)hit.point.y + offSite, (int)hit.point.z);
-            lineRenderer.SetPosition(0, mouseOver);
-            lineRenderer.SetPosition(1, mouseOver + Vector3.up * 10);
-            Debug.Log("MouseOver: " + mouseOver);
-        }
-        else
-        {
-            mouseOver = new Vector3(-1, -1, -1);
-        }
+            RaycastHit hit;
+            if (Physics.Raycast(_camera.ScreenPointToRay(Input.mousePosition), out hit, 25.0f, layerMask))
+            {
+                //cast it as int to get the whole number
+                mouseOver = new Vector3((int)hit.point.x, (int)hit.point.y + offSite, (int)hit.point.z);
+                Debug.Log("MouseOver: " + mouseOver);
+            }
+            else
+            {
+                mouseOver = new Vector3(-1, -1, -1);
+            }
     }
 
     public Vector3 UpdateDragPosition(LayerMask layerMask, Vector3 pos)
     {
         Vector3 position = pos;
+        if(IsDraggingPiece) return position;
         if (_camera == null)
         {
             Debug.Log("No camera found");

@@ -91,14 +91,16 @@ public class BoardGenerator : MonoBehaviour
         {
             int x = (int)_mouseOver.x;
             int z = (int)_mouseOver.z;
+
             if (_selectedPiece != null)
             {
                 //float the piece above the board when dragging
                 _selectedPiece.transform.position = _inputController.UpdateDragPosition(_layerMask,_selectedPiece.transform.position);
             }
 
-            if (_inputController.IsDraggingPiece)
+            if (_inputController.IsDraggingPiece && !_inputController.hasAPiece)
             {
+                
                 SelectPiece(x, z);
             }
 
@@ -359,6 +361,7 @@ public class BoardGenerator : MonoBehaviour
             {
                 return;
             }
+            _inputController.hasAPiece = true;
             _selectedPiece = p;
             _startDrag = _mouseOver;
             ShowAllAvailableMove();
