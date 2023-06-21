@@ -94,7 +94,7 @@ public class BoardGenerator : MonoBehaviour
             if (_selectedPiece != null)
             {
                 //float the piece above the board when dragging
-                _selectedPiece.transform.position = _inputController.UpdateDragPosition(_layerMask);
+                _selectedPiece.transform.position = _inputController.UpdateDragPosition(_layerMask,_selectedPiece.transform.position);
             }
 
             if (_inputController.IsDraggingPiece)

@@ -103,9 +103,9 @@ public class InputController : NetworkBehaviour
         }
     }
 
-    public Vector3 UpdateDragPosition(LayerMask layerMask)
+    public Vector3 UpdateDragPosition(LayerMask layerMask, Vector3 pos)
     {
-        Vector3 position = new Vector3(1, 1, 1);
+        Vector3 position = pos;
         if (_camera == null)
         {
             Debug.Log("No camera found");
