@@ -90,7 +90,6 @@ public class InputController : NetworkBehaviour
     {
         mouseOver = new Vector3(-1, -1, -1);
       
-    
             if (_camera == null)
             {
                 Debug.Log("No camera found");
@@ -113,7 +112,6 @@ public class InputController : NetworkBehaviour
     public Vector3 UpdateDragPosition(LayerMask layerMask, Vector3 pos)
     {
         Vector3 position = pos;
-        if(IsDraggingPiece) return position;
         if (_camera == null)
         {
             Debug.Log("No camera found");
