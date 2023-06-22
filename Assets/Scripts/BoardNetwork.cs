@@ -39,7 +39,7 @@ public class BoardNetwork : NetworkBehaviour
         {
             _camera.transform.position = _cameraOffsetClient;
             _camera.transform.eulerAngles = _cameraOffsetRotatedClient;
-            InputController.Instance.BoardOffsetClient = BoardGenerator.Instance.BoardOffset * _clientOffset;
+            InputController.Instance.BoardOffsetClient = BoardGenerator.Instance.BoardOffset;
         }
         else
         {
